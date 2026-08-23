@@ -13,9 +13,36 @@ export type ParsedNewsItem = {
 
 const parser = new Parser();
 
+/** 判断内容是否为网页 HTML（而非 RSS/JSON） */
+function isHtml(text: string): boolean {
+  return /^\s*<!DOCTYPE|^\s*<html/i.test(text);
+}
+
 /** 从 RSS 源采集 */
 export async function fetchRss(url: string): Promise<ParsedNewsItem[]> {
-  const feed = await parser.parseURL(url);
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; BlogBot/1.0)",
+      Accept: "application/rss+xml, application/xml, text/xml, */*",
+    },
+    next: { revalidate: 0 },
+  });
+  if (!res.ok) throw new Error(`RSS 请求失败：HTTP ${res.status}`);
+
+  const text = await res.text();
+  if (isHtml(text)) {
+    throw new Error("该地址返回的是网页（HTML），不是 RSS 源。请填写真正的 RSS 地址（如 xxx/feed 或 xxx/rss.xml）");
+  }
+
+  let feed;
+  try {
+    feed = await parser.parseString(text);
+  } catch (e) {
+    throw new Error(
+      `RSS 解析失败：${e instanceof Error ? e.message : String(e)}。请确认地址是有效的 RSS/Atom 源`,
+    );
+  }
+
   return (feed.items ?? []).map((item) => ({
     title: item.title?.trim() ?? "未命名",
     url: item.link?.trim() ?? "",
@@ -32,7 +59,20 @@ export async function fetchApi(url: string, config: any): Promise<ParsedNewsItem
     next: { revalidate: 0 },
   });
   if (!res.ok) throw new Error(`新闻 API 请求失败：${res.status}`);
-  const json: any = await res.json();
+
+  const text = await res.text();
+  if (isHtml(text)) {
+    throw new Error("该地址返回的是网页（HTML），不是 JSON API。请填写真正返回 JSON 的接口地址");
+  }
+
+  let json: any;
+  try {
+    json = JSON.parse(text);
+  } catch (e) {
+    throw new Error(
+      `JSON 解析失败：${e instanceof Error ? e.message : String(e)}。请确认地址返回的是 JSON 数据`,
+    );
+  }
 
   const itemsPath: string | undefined = config?.itemsPath;
   const list: any[] = itemsPath
