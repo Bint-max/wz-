@@ -1,21 +1,23 @@
 /**
  * AI 客户端封装（DeepSeek）
  * DeepSeek 提供 OpenAI 兼容接口，故复用 OpenAI SDK。
- * API Key 从环境变量读取，绝不在代码中写死。
+ * 配置优先读取数据库（可在后台「AI 设置」维护），未配置时回退环境变量。
  */
 import OpenAI from "openai";
+import { getAiConfig } from "./config";
 
-export function getAiClient() {
-  const apiKey = process.env.DEEPSEEK_API_KEY;
-  if (!apiKey) {
-    throw new Error("DEEPSEEK_API_KEY 未配置，请在 .env 中设置");
+export async function getAiClient() {
+  const config = await getAiConfig();
+  if (!config.apiKey) {
+    throw new Error("DeepSeek API Key 未配置，请在后台「AI 设置」或 .env 中设置");
   }
   return new OpenAI({
-    apiKey,
-    baseURL: process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
+    apiKey: config.apiKey,
+    baseURL: config.baseUrl,
   });
 }
 
-export function getAiModel() {
-  return process.env.DEEPSEEK_MODEL || "deepseek-chat";
+export async function getAiModel() {
+  const config = await getAiConfig();
+  return config.model;
 }

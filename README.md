@@ -11,7 +11,7 @@
 - **后台管理**：管理员登录、发布/编辑/删除文章、图片上传、数据看板
 - **评论系统**：评论提交、审核、删除、基础反垃圾
 - **个人信息页**：介绍、技术技能、工作经历、项目经历、联系方式
-- **AI 内容生产**：RSS/API 新闻采集、**按新闻类型筛选**、去重、AI 原创文章生成、审核发布、每日定时任务
+- **AI 内容生产**：RSS/API 新闻采集、**按新闻类型筛选**、去重、AI 原创文章生成、审核发布、每日定时任务、**后台直接配置 DeepSeek**
 - **额外功能**：深色/浅色切换、SEO、RSS、站点地图、图片懒加载、加载动画、GitHub 链接、响应式布局
 
 ## 🎀 卡哇伊主题（Kawaii）
@@ -87,6 +87,13 @@ AI 草稿（AiArticle，status=0）
 - AI 文章审核：`/admin/ai-articles`
 - 新闻来源配置：`/admin/ai-sources`
 
+### DeepSeek 配置
+
+DeepSeek 的 API Key、模型与接口地址可在后台 **「AI 设置」**（`/admin/ai-settings`）直接配置：
+- API Key 加密存储在数据库，不会明文暴露；
+- 数据库未配置时回退读取 `.env` 中的 `DEEPSEEK_API_KEY` 等变量；
+- 无需手动修改服务器文件即可切换模型（`deepseek-chat` / `deepseek-reasoner`）。
+
 ### 新闻类型
 
 在「新闻来源」中可为每个来源指定**新闻类型**（如 科技 / 财经 / 体育 / 生活）。
@@ -125,6 +132,8 @@ pnpm scheduler
 | `POST /api/admin/ai/collect` | 手动采集新闻（body 支持 `sourceId`、`type`） |
 | `POST /api/admin/ai/generate` | 手动 AI 生成（body 支持 `newsId`、`limit`、`type`） |
 | `GET /api/admin/ai/types` | 获取已有新闻类型列表 |
+| `GET /api/admin/ai/settings` | 获取 DeepSeek 配置（脱敏） |
+| `POST /api/admin/ai/settings` | 保存 DeepSeek 配置（API Key 加密存储） |
 | `GET/POST /api/cron/ai-daily` | 定时入口（需 `CRON_SECRET`） |
 
 ## 🚀 本地运行
@@ -192,7 +201,7 @@ pnpm db:reset     # 重置数据库并重新执行种子
 | `JWT_SECRET` | 登录 Token 签名密钥（生产必须更换） | 任意长随机字符串 |
 | `NEXT_PUBLIC_SITE_URL` | 站点地址（用于 SEO/RSS/站点地图） | `https://your-blog.example.com` |
 | `NEXT_PUBLIC_ALLOW_REGISTER` | 是否允许公开注册（当前版本保留字段） | `false` |
-| `DEEPSEEK_API_KEY` | DeepSeek API 密钥（不写死在代码） | `sk-...` |
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥（不写死在代码；也可在后台「AI 设置」配置） | `sk-...` |
 | `DEEPSEEK_MODEL` | AI 模型 | `deepseek-chat` |
 | `DEEPSEEK_BASE_URL` | DeepSeek API 地址 | `https://api.deepseek.com` |
 | `CRON_SECRET` | 定时接口鉴权密钥 | 任意长随机字符串 |

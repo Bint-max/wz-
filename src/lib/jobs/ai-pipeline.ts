@@ -97,9 +97,10 @@ export async function generateFromNews(newsItemId: string) {
     settings,
   );
 
-  const client = getAiClient();
+  const client = await getAiClient();
+  const model = await getAiModel();
   const completion = await client.chat.completions.create({
-    model: getAiModel(),
+    model,
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -134,7 +135,7 @@ export async function generateFromNews(newsItemId: string) {
     tags: output.tags,
     suggestedCategoryId,
     sourceUrl: news.url,
-    model: getAiModel(),
+    model,
     tokenUsage: completion.usage?.total_tokens,
   });
 
