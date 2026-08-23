@@ -1,10 +1,11 @@
 "use client";
 
 /**
- * 新闻来源配置
+ * 新闻来源配置（卡哇伊版）
+ * 支持一键添加 RSSHub 热门渠道模板
  */
 import { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, X, Check } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Check, Wand2 } from "lucide-react";
 
 type NewsSource = {
   id: string;
@@ -28,10 +29,11 @@ const empty = {
   configText: "",
 };
 
-export function SourceManager() {
+export function SourceManager({ rsshubBaseUrl = "https://rsshub.app" }: { rsshubBaseUrl?: string }) {
   const [sources, setSources] = useState<NewsSource[]>([]);
   const [form, setForm] = useState(empty);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [adding, setAdding] = useState<string | null>(null);
 
   const load = () =>
     fetch("/api/admin/ai/sources")
@@ -110,14 +112,73 @@ export function SourceManager() {
     load();
   };
 
+  /** 一键添加 RSSHub 热门渠道 */
+  const addTemplate = async (t: { name: string; url: string; newsType: string; tags: string[] }) => {
+    setAdding(t.name);
+    const exists = sources.some((s) => s.name === t.name);
+    if (exists) {
+      alert(`${t.name} 已存在，无需重复添加`);
+      setAdding(null);
+      return;
+    }
+    const res = await fetch("/api/admin/ai/sources", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: t.name,
+        type: "RSS",
+        url: `${rsshubBaseUrl}${t.url}`,
+        enabled: true,
+        newsType: t.newsType,
+        defaultTags: t.tags,
+      }),
+    });
+    const data = await res.json();
+    if (res.ok) {
+      load();
+    } else {
+      alert(data.error ?? `添加 ${t.name} 失败`);
+    }
+    setAdding(null);
+  };
+
+  const TEMPLATES = [
+    { name: "微博热搜", url: "/weibo/search/hot", newsType: "热点", tags: ["微博", "热搜"] },
+    { name: "知乎热榜", url: "/zhihu/hotlist", newsType: "热点", tags: ["知乎"] },
+    { name: "央视新闻", url: "/cctv/news", newsType: "要闻", tags: ["央视"] },
+  ];
+
   const inputCls =
     "rounded-2xl border-2 border-pink-100 bg-background/70 px-3 py-2 text-sm outline-none focus:border-pink-300 dark:border-pink-500/20";
 
   return (
     <div className="space-y-5">
+      {/* RSSHub 热门渠道模板 */}
+      <div className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-4 shadow-soft dark:border-white/10">
+        <h2 className="font-cute mb-1 flex items-center gap-2 text-base font-semibold">
+          <Wand2 className="h-4 w-4 text-pink-400" /> 一键添加热门渠道（RSSHub）
+        </h2>
+        <p className="mb-3 text-xs text-muted-foreground">
+          当前 RSSHub 地址：<code className="rounded bg-muted px-1">{rsshubBaseUrl}</code>
+          （可用环境变量 <code className="rounded bg-muted px-1">RSSHUB_BASE_URL</code> 换成自建实例）
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {TEMPLATES.map((t) => (
+            <button
+              key={t.name}
+              onClick={() => addTemplate(t)}
+              disabled={adding !== null}
+              className="flex items-center gap-1 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03] disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" /> {adding === t.name ? "添加中..." : t.name}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-4 shadow-soft dark:border-white/10">
         <h2 className="font-cute mb-3 text-base font-semibold">
-          {editingId ? "编辑来源" : "新增来源"}
+          {editingId ? "编辑来源" : "自定义来源"}
         </h2>
         <div className="grid gap-2 sm:grid-cols-2">
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="来源名称" className={inputCls} />
@@ -128,7 +189,7 @@ export function SourceManager() {
           </select>
           <input value={form.newsType} onChange={(e) => setForm({ ...form, newsType: e.target.value })} placeholder="新闻类型（如 科技/财经/体育）" className={inputCls} />
           <input value={form.defaultTags} onChange={(e) => setForm({ ...form, defaultTags: e.target.value })} placeholder="默认标签（逗号分隔）" className={inputCls} />
-          <input value={form.configText} onChange={(e) => setForm({ ...form, configText: e.target.value })} placeholder="config JSON（可选）" className={`sm:col-span-2 ${inputCls}`} />
+          <input value={form.configText} onChange={(e) => setForm({ ...form, configText: e.target.value })} placeholder="config JSON（可选）" className={inputCls} />
         </div>
         <div className="mt-3 flex items-center gap-3">
           <label className="flex items-center gap-2 text-sm">
@@ -188,7 +249,7 @@ export function SourceManager() {
         ))}
         {sources.length === 0 && (
           <p className="rounded-[1.5rem] border-2 border-dashed border-pink-100 py-12 text-center text-sm text-muted-foreground">
-            还没有新闻来源，先添加一个 RSS 吧 ✿
+            还没有新闻来源，可以点上面「一键添加热门渠道」，或手动添加 ✿
           </p>
         )}
       </div>

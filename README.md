@@ -87,6 +87,22 @@ AI 草稿（AiArticle，status=0）
 - AI 文章审核：`/admin/ai-articles`
 - 新闻来源配置：`/admin/ai-sources`
 
+### RSSHub 热门渠道（方案 A）
+
+系统支持**一键添加热门渠道**（微博热搜 / 知乎热榜 / 央视新闻），数据源来自 RSSHub：
+
+```bash
+# 1. 自建 RSSHub（推荐，稳定且免费）
+docker run -d --name rsshub -p 1200:1200 diygod/rsshub
+
+# 2. 在 .env 配置自建地址（不配置则用公共实例 rsshub.app，可能限流）
+RSSHUB_BASE_URL="http://你的服务器IP:1200"
+```
+
+然后到「新闻来源」页点「一键添加热门渠道」即可，无需手动填 URL。
+
+> 💡 关于「自动从微博 / 央视 / 知乎获取新闻」的完整可行性分析，请阅读 [docs/ai-news-feasibility.md](./docs/ai-news-feasibility.md)。
+
 ### DeepSeek 配置
 
 DeepSeek 的 API Key、模型与接口地址可在后台 **「AI 设置」**（`/admin/ai-settings`）直接配置：
@@ -209,6 +225,7 @@ pnpm db:reset     # 重置数据库并重新执行种子
 | `CRON_SECRET` | 定时接口鉴权密钥 | 任意长随机字符串 |
 | `NOTIFY_WEBHOOK_URL` | 管理员通知 Webhook（可选） | 飞书/钉钉/企业微信机器人地址 |
 | `AI_DAILY_LIMIT` | 每日自动生成文章数量 | `3` |
+| `RSSHUB_BASE_URL` | RSSHub 地址（可选，默认公共实例） | `http://your-ip:1200` |
 
 ## ☁️ 部署
 
