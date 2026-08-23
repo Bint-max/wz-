@@ -2,7 +2,7 @@
 
 /**
  * AI 流水线手动触发面板
- * 采集新闻 / 批量生成文章（可按新闻类型筛选）
+ * 采集新闻 / 批量生成文章（可按新闻类型筛选），并展示详细失败原因
  */
 import { useEffect, useState } from "react";
 import { RefreshCw, Sparkles } from "lucide-react";
@@ -13,6 +13,7 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
   const [types, setTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState<"collect" | "generate" | null>(null);
   const [message, setMessage] = useState("");
+  const [errors, setErrors] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/admin/ai/types")
@@ -24,6 +25,7 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
   const collect = async () => {
     setLoading("collect");
     setMessage("");
+    setErrors([]);
     try {
       const res = await fetch("/api/admin/ai/collect", {
         method: "POST",
@@ -32,7 +34,8 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "采集失败");
-      setMessage(`采集完成：新增 ${data.data.created} 条，更新 ${data.data.updated} 条，失败 ${data.data.failed} 条 ✿`);
+      setMessage(`采集完成：新增 ${data.data.created} 条，更新 ${data.data.updated} 条，失败 ${data.data.failed} 条`);
+      setErrors(data.data.errors ?? []);
       onDone?.();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "采集失败");
@@ -44,6 +47,7 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
   const generate = async () => {
     setLoading("generate");
     setMessage("");
+    setErrors([]);
     try {
       const res = await fetch("/api/admin/ai/generate", {
         method: "POST",
@@ -52,7 +56,8 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "生成失败");
-      setMessage(`生成完成：成功 ${data.data.success} 篇，失败 ${data.data.failed} 篇 ✨`);
+      setMessage(`生成完成：成功 ${data.data.success} 篇，失败 ${data.data.failed} 篇`);
+      setErrors(data.data.errors ?? []);
       onDone?.();
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "生成失败");
@@ -105,8 +110,20 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
 
         {message && <span className="text-sm text-muted-foreground">{message}</span>}
       </div>
+
+      {errors.length > 0 && (
+        <div className="mt-3 rounded-2xl border-2 border-red-100 bg-red-50/70 p-3 dark:border-red-500/20 dark:bg-red-950/30">
+          <p className="mb-1 text-xs font-medium text-red-500">失败原因：</p>
+          <ul className="list-inside list-disc space-y-0.5 text-xs text-red-500">
+            {errors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <p className="mt-3 text-xs text-muted-foreground">
-        生成前请先在「新闻来源」中配置 RSS/API 来源，并在 .env 中配置 DEEPSEEK_API_KEY。
+        生成前请先在「新闻来源」中配置 RSS/API 来源，并在「AI 设置」中配置 DeepSeek API Key。
       </p>
     </div>
   );
