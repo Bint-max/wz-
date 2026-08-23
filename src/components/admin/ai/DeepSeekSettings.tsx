@@ -1,15 +1,18 @@
 "use client";
 
 /**
- * DeepSeek 配置表单（后台维护，无需改 .env）
+ * AI 配置表单（后台维护，无需改 .env）
+ * - DeepSeek：API Key / 模型 / 接口地址
+ * - RSSHub：热门渠道数据源地址
  */
 import { useEffect, useState } from "react";
-import { Save, KeyRound, Cpu, Link2 } from "lucide-react";
+import { Save, KeyRound, Cpu, Link2, Rss } from "lucide-react";
 
 export function DeepSeekSettings() {
   const [apiKey, setApiKey] = useState("");
   const [model, setModel] = useState("deepseek-chat");
   const [baseUrl, setBaseUrl] = useState("https://api.deepseek.com");
+  const [rsshubBaseUrl, setRsshubBaseUrl] = useState("https://rsshub.app");
   const [masked, setMasked] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -21,6 +24,7 @@ export function DeepSeekSettings() {
         if (d.success) {
           setModel(d.data.model);
           setBaseUrl(d.data.baseUrl);
+          setRsshubBaseUrl(d.data.rsshubBaseUrl);
           setMasked(d.data.apiKeyMasked);
         }
       })
@@ -38,13 +42,14 @@ export function DeepSeekSettings() {
           apiKey: apiKey || undefined,
           model,
           baseUrl,
+          rsshubBaseUrl,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "保存失败");
       setApiKey("");
       setMasked("已保存（新 Key 已加密存储）");
-      setMessage("保存成功 ✿ 生成文章时将使用此配置");
+      setMessage("保存成功 ✿");
     } catch (e) {
       setMessage(e instanceof Error ? e.message : "保存失败");
     } finally {
@@ -57,9 +62,10 @@ export function DeepSeekSettings() {
 
   return (
     <div className="max-w-2xl space-y-5">
+      {/* DeepSeek 配置 */}
       <div className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-5 shadow-soft dark:border-white/10">
         <h2 className="font-cute mb-1 flex items-center gap-2 text-base font-semibold">
-          <KeyRound className="h-4 w-4 text-pink-400" /> DeepSeek API 配置
+          <KeyRound className="h-4 w-4 text-pink-400" /> DeepSeek 配置
         </h2>
         <p className="mb-4 text-xs text-muted-foreground">
           配置保存在数据库中（API Key 加密存储），未填写的项沿用原配置；也可在 .env 中配置作为默认值。
@@ -90,27 +96,49 @@ export function DeepSeekSettings() {
             </div>
             <div>
               <label className="mb-1 flex items-center gap-1 text-sm font-medium">
-                <Link2 className="h-4 w-4 text-sky-400" /> 接口地址
+                <Link2 className="h-4 w-4 text-sky-400" /> DeepSeek 接口地址
               </label>
               <input value={baseUrl} onChange={(e) => setBaseUrl(e.target.value)} className={inputCls} />
             </div>
           </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={save}
-              disabled={saving}
-              className="cute-btn-pop flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-5 py-2.5 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03] disabled:opacity-50"
-            >
-              <Save className="h-4 w-4" /> {saving ? "保存中..." : "保存配置"}
-            </button>
-            {message && <span className="text-sm text-muted-foreground">{message}</span>}
-          </div>
         </div>
       </div>
 
+      {/* RSSHub 配置 */}
+      <div className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-5 shadow-soft dark:border-white/10">
+        <h2 className="font-cute mb-1 flex items-center gap-2 text-base font-semibold">
+          <Rss className="h-4 w-4 text-orange-400" /> RSSHub 配置
+        </h2>
+        <p className="mb-4 text-xs text-muted-foreground">
+          用于「一键添加热门渠道」（微博热搜 / 知乎热榜 / 央视新闻）。默认公共实例，建议自建后填写。
+        </p>
+        <div>
+          <label className="mb-1 block text-sm font-medium">RSSHub 地址</label>
+          <input
+            value={rsshubBaseUrl}
+            onChange={(e) => setRsshubBaseUrl(e.target.value)}
+            placeholder="http://127.0.0.1:1200"
+            className={inputCls}
+          />
+          <p className="mt-1 text-xs text-muted-foreground">
+            自建命令：docker run -d --name rsshub -p 1200:1200 diygod/rsshub
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="cute-btn-pop flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-5 py-2.5 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03] disabled:opacity-50"
+        >
+          <Save className="h-4 w-4" /> {saving ? "保存中..." : "保存配置"}
+        </button>
+        {message && <span className="text-sm text-muted-foreground">{message}</span>}
+      </div>
+
       <p className="text-xs text-muted-foreground">
-        提示：配置保存后，在「AI 文章」页点击「生成文章」即可使用。未配置 Key 时会提示错误，不影响博客其它功能。
+        提示：配置保存后，在「AI 文章」页点击「生成文章」即可使用；「新闻来源」页的一键添加渠道会自动使用这里配置的 RSSHub 地址。
       </p>
     </div>
   );

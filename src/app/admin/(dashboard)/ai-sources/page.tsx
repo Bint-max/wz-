@@ -1,10 +1,11 @@
 import { SourceManager } from "@/components/admin/ai/SourceManager";
+import { getRsshubBaseUrl } from "@/lib/ai/config";
 
 export const metadata = { title: "新闻来源" };
 export const dynamic = "force-dynamic";
 
-export default function AiSourcesPage() {
-  const rsshubBaseUrl = process.env.RSSHUB_BASE_URL || "https://rsshub.app";
+export default async function AiSourcesPage() {
+  const rsshubBaseUrl = await getRsshubBaseUrl();
   return (
     <div className="space-y-6">
       <div>

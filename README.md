@@ -99,7 +99,7 @@ docker run -d --name rsshub -p 1200:1200 diygod/rsshub
 RSSHUB_BASE_URL="http://你的服务器IP:1200"
 ```
 
-然后到「新闻来源」页点「一键添加热门渠道」即可，无需手动填 URL。
+然后到后台「AI 设置」填入 RSSHub 地址（或使用默认公共实例），再到「新闻来源」页点「一键添加热门渠道」即可，无需手动填 URL。
 
 > 💡 关于「自动从微博 / 央视 / 知乎获取新闻」的完整可行性分析，请阅读 [docs/ai-news-feasibility.md](./docs/ai-news-feasibility.md)。
 
@@ -225,7 +225,7 @@ pnpm db:reset     # 重置数据库并重新执行种子
 | `CRON_SECRET` | 定时接口鉴权密钥 | 任意长随机字符串 |
 | `NOTIFY_WEBHOOK_URL` | 管理员通知 Webhook（可选） | 飞书/钉钉/企业微信机器人地址 |
 | `AI_DAILY_LIMIT` | 每日自动生成文章数量 | `3` |
-| `RSSHUB_BASE_URL` | RSSHub 地址（可选，默认公共实例） | `http://your-ip:1200` |
+| `RSSHUB_BASE_URL` | RSSHub 地址（可选，默认公共实例；也可在后台「AI 设置」配置） | `http://your-ip:1200` |
 
 ## ☁️ 部署
 
