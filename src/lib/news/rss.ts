@@ -15,14 +15,15 @@ const parser = new Parser();
 
 /** 判断内容是否为网页 HTML（而非 RSS/JSON） */
 function isHtml(text: string): boolean {
-  return /^\s*<!DOCTYPE|^\s*<html/i.test(text);
+  return /<!DOCTYPE|<html/i.test(text.slice(0, 4000));
 }
 
 /** 从 RSS 源采集 */
 export async function fetchRss(url: string): Promise<ParsedNewsItem[]> {
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; BlogBot/1.0)",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
       Accept: "application/rss+xml, application/xml, text/xml, */*",
     },
     next: { revalidate: 0 },
@@ -30,6 +31,9 @@ export async function fetchRss(url: string): Promise<ParsedNewsItem[]> {
   if (!res.ok) throw new Error(`RSS 请求失败：HTTP ${res.status}`);
 
   const text = await res.text();
+  if (!text.trim()) {
+    throw new Error("该地址返回内容为空，可能已失效或被反爬拦截，请更换来源");
+  }
   if (isHtml(text)) {
     throw new Error("该地址返回的是网页（HTML），不是 RSS 源。请填写真正的 RSS 地址（如 xxx/feed 或 xxx/rss.xml）");
   }
