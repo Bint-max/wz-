@@ -6,6 +6,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  Music2,
   LayoutDashboard,
   FileText,
   MessageSquare,
@@ -26,6 +27,7 @@ const items = [
   { href: "/admin/ai-settings", label: "AI 设置", icon: KeyRound },
   { href: "/admin/comments", label: "评论审核", icon: MessageSquare },
   { href: "/admin/categories", label: "分类管理", icon: FolderOpen },
+  { href: "/admin/music", label: "音乐管理", icon: Music2 },
   { href: "/admin/settings", label: "站点设置", icon: Settings },
 ];
 

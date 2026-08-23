@@ -6,6 +6,7 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { BackToTop } from "@/components/ui/back-to-top";
 import { BubbleCursor } from "@/components/ui/BubbleCursor";
+import { MusicPlayer } from "@/components/music/music-player";
 import { FloatingDecor } from "@/components/home/FloatingDecor";
 import { getSiteSettings } from "@/lib/settings";
 
@@ -69,6 +70,7 @@ export default function RootLayout({
           </div>
           <BackToTop />
           <BubbleCursor />
+          <MusicPlayer />
         </ThemeProvider>
       </body>
     </html>

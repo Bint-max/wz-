@@ -8,9 +8,10 @@
 
 - **首页**：个人头像、简介、最新文章、热门文章、技术标签、访问统计
 - **文章系统**：Markdown 编辑、实时预览、代码高亮、分类/标签、搜索、阅读量统计
-- **后台管理**：管理员登录、发布/编辑/删除文章、图片上传、数据看板
+- **后台管理**：管理员登录、发布/编辑/删除文章、图片上传、数据看板、音乐管理（歌曲/封面/歌词上传、排序、推荐/首页歌单）
 - **评论系统**：评论提交、审核、删除、基础反垃圾
 - **个人信息页**：介绍、技术技能、工作经历、项目经历、联系方式
+- **全局音乐播放器**：底部悬浮播放器，支持播放/暂停/切歌/音量/进度、顺序/单曲循环/随机播放、封面旋转、LRC 歌词滚动高亮、播放列表与进度持久化、深色模式适配
 - **AI 内容生产**：RSS/API 新闻采集、**按新闻类型筛选**、去重、AI 原创文章生成、审核发布、每日定时任务、**后台直接配置 DeepSeek**
 - **额外功能**：深色/浅色切换、SEO、RSS、站点地图、图片懒加载、加载动画、GitHub 链接、响应式布局
 
@@ -44,7 +45,7 @@
 ```
 personal-blog/
 ├── prisma/
-│   ├── schema.prisma        # 数据库模型（含 AI 模块）
+│   ├── schema.prisma        # 数据库模型（含 AI 与音乐模块）
 │   └── seed.ts              # 种子数据脚本
 ├── public/
 │   ├── images/avatar.png    # 默认头像
@@ -60,13 +61,57 @@ personal-blog/
 │   │   ├── api/             # 后端 API（含 AI 模块接口）
 │   │   ├── sitemap.ts       # 站点地图
 │   │   └── robots.ts        # 爬虫规则
-│   ├── components/          # 组件化 UI
+│   ├── components/          # 组件化 UI（含 music/ 播放器、admin/music-manager）
 │   ├── lib/                 # 工具、认证、数据访问、AI 模块
 │   └── types/               # 类型定义
 ├── .env.example             # 环境变量示例
 ├── docker-compose.yml       # 本地 PostgreSQL
 └── next.config.ts
 ```
+
+## 🎵 音乐播放器模块
+
+前台全局悬浮播放器组件位于 `src/components/music/music-player.tsx`，挂载在根布局中（后台 `/admin/*` 页面自动隐藏，避免干扰管理操作）。
+
+### 前台功能
+
+- 底部悬浮圆形按钮，点击展开为网易云风格播放卡片，支持平滑展开/收起
+- 播放 / 暂停 / 上一首 / 下一首 / 音量调节 / 进度拖动
+- 顺序播放 / 单曲循环 / 随机播放三种模式
+- 封面旋转、播放按钮呼吸光效、加载状态、网络异常与加载失败提示
+- 刷新页面后自动恢复播放列表、当前歌曲与播放模式（localStorage）
+- LRC 歌词解析、滚动显示与当前行高亮
+- 深色 / 浅色主题自适应，PC / 移动端自适应
+
+### 后台管理
+
+- 入口：`/admin/music`
+- 支持添加 / 编辑 / 删除歌曲，上传音乐文件（mp3/m4a/aac/wav/flac/ogg）、封面（jpg/png/webp/gif/svg）、歌词（lrc/txt）
+- 通过上移 / 下移调整排序，支持「推荐歌曲」与「首页背景音乐」标记
+- 普通用户无后台权限，只能在前台播放
+
+### 主要接口
+
+| 接口 | 权限 | 说明 |
+| --- | --- | --- |
+| `GET /api/music/list` | 公开 | 获取前台歌单（支持 `category` / `recommend` / `home` 过滤） |
+| `GET /api/music/{id}` | 公开 | 获取歌曲详情 |
+| `POST /api/music/{id}/play` | 公开 | 记录播放次数 |
+| `GET/POST /api/admin/music` | 管理员 | 后台歌单列表 / 新增歌曲 |
+| `PUT/DELETE /api/admin/music/{id}` | 管理员 | 编辑 / 删除歌曲 |
+| `PUT /api/admin/music/reorder` | 管理员 | 调整排序（body: `{ ids: [...] }`） |
+| `POST /api/admin/music/upload` | 管理员 | 上传音乐/歌词/封面（multipart，字段 `file` 与可选 `kind`） |
+
+### 场景扩展接口
+
+组件监听全局事件 `music:set-scene`，可用于「根据文章分类切换歌单」。在任意客户端代码中调用：
+
+```ts
+import { setMusicScene } from "@/lib/music";
+setMusicScene("tech"); // 切换到 tech 分类歌单；null 恢复默认歌单
+```
+
+`category` 字段建议填写文章分类 slug（如 `tech`、`life`）或特殊值 `home`，后台可按此字段标记首页背景音乐。
 
 ## 🤖 AI 内容生产模块
 
@@ -252,9 +297,9 @@ pnpm db:push && pnpm db:seed
 4. 定时任务使用 `pnpm scheduler`（node-cron）或系统 crontab 调用 `pnpm ai:daily`。
 5. 可选 Nginx 反向代理 + certbot 配置 HTTPS。
 
-### 关于图片上传
+### 关于文件上传
 
-本地开发时，后台上传的图片会写入 `public/uploads` 目录。Vercel 的 Serverless 文件系统是只读且临时的，**请勿直接依赖本地磁盘存储图片**。生产环境建议将图片上传改为对象存储（如 S3 / Cloudinary / 阿里云 OSS），只需改造 `src/app/api/upload/route.ts` 即可。
+本地开发时，后台上传的图片、音乐与歌词会分别写入 `public/uploads`、`public/uploads/music`、`public/uploads/lyrics` 等目录。Vercel 的 Serverless 文件系统是只读且临时的，**请勿直接依赖本地磁盘存储文件**。生产环境建议将文件上传改为对象存储（如 S3 / Cloudinary / 阿里云 OSS），只需改造 `src/app/api/upload/route.ts` 与 `src/lib/upload.ts` 即可。
 
 ## 📜 常用脚本
 

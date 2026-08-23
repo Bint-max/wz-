@@ -43,3 +43,22 @@ export type TagItem = {
   slug: string;
   _count: { posts: number };
 };
+
+export type MusicStatus = "ACTIVE" | "DISABLED";
+
+export type MusicItem = {
+  id: string;
+  title: string;
+  artist: string;
+  cover: string | null;
+  url: string;
+  lyric: string | null;
+  category: string | null;
+  isRecommend: boolean;
+  isHomeBgm: boolean;
+  playCount: number;
+  sort: number;
+  status: MusicStatus;
+  createdAt: string;
+  updatedAt: string;
+};

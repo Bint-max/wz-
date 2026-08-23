@@ -90,3 +90,18 @@ export const aiGenerateSchema = z.object({
 export const publishArticleSchema = z.object({
   id: z.string().min(1, "缺少文章 ID"),
 });
+
+// ---------- 音乐播放器模块 ----------
+
+export const musicSchema = z.object({
+  title: z.string().min(1, "歌曲名称不能为空").max(200),
+  artist: z.string().min(1, "歌手名称不能为空").max(100),
+  cover: z.string().optional().nullable().or(z.literal("")),
+  url: z.string().min(1, "音乐文件地址不能为空"),
+  lyric: z.string().optional().nullable().or(z.literal("")),
+  category: z.string().max(50).optional().nullable().or(z.literal("")),
+  isRecommend: z.boolean().optional().default(false),
+  isHomeBgm: z.boolean().optional().default(false),
+  sort: z.number().int().optional().default(0),
+  status: z.enum(["ACTIVE", "DISABLED"]).optional().default("ACTIVE"),
+});

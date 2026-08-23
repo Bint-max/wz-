@@ -286,3 +286,37 @@ model AiRunLog {
   @@index([runType, createdAt])
   @@map("ai_run_logs")
 }
+
+// ===============================================================
+// 音乐播放器模块
+// ===============================================================
+
+enum MusicStatus {
+  ACTIVE
+  DISABLED
+}
+
+// ---------------------------------------------------------------
+// 音乐表：前台播放器 + 后台音乐管理
+// category 为场景标签，可填文章分类 slug（如 tech / life）或特殊场景 home
+// ---------------------------------------------------------------
+model Music {
+  id         String      @id @default(cuid())
+  title      String
+  artist     String
+  cover      String?     // 封面地址
+  url        String      // 音乐文件地址
+  lyric      String?     // 歌词文件地址（.lrc / .txt）
+  category   String?     // 场景标签：文章分类 slug 或 home（首页背景音乐）
+  isRecommend Boolean    @default(false) // 推荐歌曲
+  isHomeBgm  Boolean     @default(false) // 是否作为首页背景音乐
+  playCount  Int         @default(0)
+  sort       Int         @default(0)
+  status     MusicStatus @default(ACTIVE)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+
+  @@index([status, sort])
+  @@index([category])
+  @@map("music")
+}
