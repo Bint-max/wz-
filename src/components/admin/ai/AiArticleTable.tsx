@@ -12,7 +12,7 @@ type AiArticleItem = {
   id: string;
   title: string;
   summary: string | null;
-  status: number;
+  status: string;
   model: string | null;
   createdAt: string;
   tags: string[];
@@ -23,12 +23,21 @@ type AiArticleItem = {
 
 const tabs = [
   { key: "", label: "全部" },
-  { key: "0", label: "草稿" },
-  { key: "1", label: "已发布" },
+  { key: "DRAFT", label: "草稿" },
+  { key: "PENDING_REVIEW", label: "待审核" },
+  { key: "PUBLISHED", label: "已发布" },
+  { key: "REJECTED", label: "已拒绝" },
 ];
 
+const STATUS_LABELS: Record<string, string> = {
+  DRAFT: "草稿",
+  PENDING_REVIEW: "待审核",
+  PUBLISHED: "已发布",
+  REJECTED: "已拒绝",
+};
+
 export function AiArticleTable() {
-  const [tab, setTab] = useState("0");
+  const [tab, setTab] = useState("DRAFT");
   const [items, setItems] = useState<AiArticleItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -104,12 +113,12 @@ export function AiArticleTable() {
                 <span
                   className={cn(
                     "rounded-full px-2.5 py-0.5 text-xs",
-                    item.status === 1
+                    item.status === "PUBLISHED"
                       ? "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300"
                       : "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
                   )}
                 >
-                  {item.status === 1 ? "已发布" : "草稿"}
+                  {item.status === "PUBLISHED" ? "已发布" : "草稿"}
                 </span>
                 {item.category && (
                   <span className="rounded-full bg-pink-50 px-2.5 py-0.5 text-xs text-pink-500">
@@ -154,7 +163,7 @@ export function AiArticleTable() {
                 >
                   <Pencil className="h-3.5 w-3.5" /> 编辑
                 </Link>
-                {item.status !== 1 && (
+                {item.status !== "PUBLISHED" && (
                   <button
                     onClick={() => publish(item.id)}
                     className="flex items-center gap-1 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-3 py-1.5 text-xs text-white shadow-soft transition hover:opacity-90"

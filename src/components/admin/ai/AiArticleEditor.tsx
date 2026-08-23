@@ -20,7 +20,7 @@ export function AiArticleEditor({ id }: { id: string }) {
   const [tags, setTags] = useState("");
   const [suggestedCategoryId, setSuggestedCategoryId] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
-  const [status, setStatus] = useState(0);
+  const [status, setStatus] = useState<string>("DRAFT");
   const [sourceUrl, setSourceUrl] = useState("");
   const [tab, setTab] = useState<"edit" | "preview">("edit");
   const [saving, setSaving] = useState(false);
@@ -88,7 +88,7 @@ export function AiArticleEditor({ id }: { id: string }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "发布失败");
-      setStatus(1);
+      setStatus("PUBLISHED");
       setMessage("发布成功 ✿");
       router.push("/admin/ai-articles");
       router.refresh();
@@ -120,7 +120,7 @@ export function AiArticleEditor({ id }: { id: string }) {
             <Save className="mr-1 inline h-4 w-4" />
             {saving ? "保存中..." : "保存"}
           </button>
-          {status !== 1 && (
+          {status !== "PUBLISHED" && (
             <button
               onClick={publish}
               disabled={publishing}

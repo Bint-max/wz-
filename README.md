@@ -45,7 +45,8 @@
 ```
 personal-blog/
 ├── prisma/
-│   ├── schema.prisma        # 数据库模型（含 AI 与音乐模块）
+│   ├── schema.prisma        # 数据库模型（用户/文章/AI/音乐/媒体/审计/SEO）
+│   ├── migrations/          # 数据库迁移文件（migration.sql）
 │   └── seed.ts              # 种子数据脚本
 ├── public/
 │   ├── images/avatar.png    # 默认头像
@@ -246,15 +247,29 @@ pnpm dev
 docker compose up -d
 ```
 
-数据表由 Prisma schema 定义，常用命令：
+数据表由 Prisma schema 定义，核心数据表包括：
+
+| 模块 | 数据表 |
+| --- | --- |
+| 用户/权限 | `users`（角色、状态、最后登录时间） |
+| 内容 | `categories`、`tags`、`posts`、`post_tags`、`comments` |
+| 站点 | `site_settings`、`visit_stats`、`seo_meta` |
+| AI 内容 | `news_sources`、`news_items`、`ai_articles`、`ai_run_logs` |
+| 音乐 | `music` |
+| 文件/安全 | `media`、`audit_logs` |
+
+常用命令：
 
 ```bash
 pnpm db:push      # 同步 schema 到数据库（开发期快速建表）
-pnpm db:migrate   # 生成并应用迁移
+pnpm db:migrate   # 生成迁移（或使用已有 migrations 目录）
+pnpm prisma migrate deploy # 应用 prisma/migrations 下的迁移到数据库
 pnpm db:seed      # 写入种子数据（管理员、分类、标签、示例文章）
 pnpm db:studio    # 打开 Prisma Studio 图形界面
 pnpm db:reset     # 重置数据库并重新执行种子
 ```
+
+> 说明：仓库内已包含基线迁移 `prisma/migrations/20260823020000_refactor_db/migration.sql`，新环境可用 `pnpm prisma migrate deploy` 一键建表。历史环境若此前一直使用 `db push` 管理数据库，建议先备份数据，再决定是继续 `db push` 还是迁移到 `migrate` 工作流；其中 AI 文章的 `status` 已由 `Int(0/1)` 改为枚举 `AiArticleStatus`。
 
 ## ⚙️ 环境变量
 

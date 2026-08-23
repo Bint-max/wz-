@@ -11,31 +11,92 @@ datasource db {
 }
 
 // ---------------------------------------------------------------
-// 用户表：后台管理员 / 作者
+// 全局枚举
+// ---------------------------------------------------------------
+
+/// 用户角色：管理员 / 编辑 / 前台用户（预留）
+enum Role {
+  ADMIN
+  EDITOR
+  USER
+}
+
+/// 用户状态
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+/// AI 文章生命周期 / 审核状态
+enum AiArticleStatus {
+  DRAFT // 草稿
+  PENDING_REVIEW // 待审核
+  PUBLISHED // 已发布
+  REJECTED // 已拒绝
+}
+
+/// 评论审核状态
+enum CommentStatus {
+  PENDING
+  APPROVED
+  SPAM
+  REJECTED
+}
+
+/// 新闻来源类型
+enum NewsSourceType {
+  RSS
+  API
+}
+
+/// AI 任务运行状态
+enum AiRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+/// 音乐上下架状态
+enum MusicStatus {
+  ACTIVE
+  DISABLED
+}
+
+/// 上传文件类型
+enum MediaKind {
+  IMAGE
+  AUDIO
+  LYRIC
+  COVER
+}
+
+// ---------------------------------------------------------------
+// 用户表：后台管理员 / 作者 / 未来前台用户
 // ---------------------------------------------------------------
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
+  username     String?    @unique
   name         String
   passwordHash String
   avatar       String?
-  bio          String?   @db.Text
-  role         Role     @default(ADMIN)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  bio          String?    @db.Text
+  role         Role       @default(ADMIN)
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 
-  posts Post[]
+  posts    Post[]
+  comments Comment[]
+  uploads  Media[]
 
   @@map("users")
 }
 
-enum Role {
-  ADMIN
-  EDITOR
-}
-
 // ---------------------------------------------------------------
-// 分类表：技术分享 / 工作总结 / 学习笔记 / 项目经验 / 随笔
+// 分类表
 // ---------------------------------------------------------------
 model Category {
   id          String   @id @default(cuid())
@@ -48,12 +109,13 @@ model Category {
 
   posts      Post[]
   aiArticles AiArticle[]
+  music      Music[]
 
   @@map("categories")
 }
 
 // ---------------------------------------------------------------
-// 标签表：与技术文章多对多关联
+// 标签表
 // ---------------------------------------------------------------
 model Tag {
   id        String   @id @default(cuid())
@@ -87,9 +149,9 @@ model Post {
   aiGenerated Boolean    @default(false) // 是否由 AI 生成
   aiArticle   AiArticle?
 
-  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId String?
-  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId   String
 
   tags     PostTag[]
@@ -116,33 +178,29 @@ model PostTag {
 }
 
 // ---------------------------------------------------------------
-// 评论表：支持审核、删除与简单反垃圾机制
+// 评论表：支持审核、删除、反垃圾，并预留登录用户评论
 // ---------------------------------------------------------------
 model Comment {
-  id         String       @id @default(cuid())
-  postId     String
-  authorName String
+  id          String        @id @default(cuid())
+  postId      String
+  userId      String?
+  authorName  String
   authorEmail String?
-  content    String       @db.Text
-  status     CommentStatus @default(PENDING)
-  ip         String?
-  parentId   String?
-  createdAt  DateTime     @default(now())
+  content     String        @db.Text
+  status      CommentStatus @default(PENDING)
+  ip          String?
+  parentId    String?
+  createdAt   DateTime      @default(now())
 
   post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies Comment[] @relation("CommentReplies")
 
   @@index([postId])
   @@index([status])
+  @@index([userId])
   @@map("comments")
-}
-
-enum CommentStatus {
-  PENDING
-  APPROVED
-  SPAM
-  REJECTED
 }
 
 // ---------------------------------------------------------------
@@ -172,18 +230,6 @@ model VisitStat {
 // AI 内容生产模块
 // ===============================================================
 
-enum NewsSourceType {
-  RSS
-  API
-}
-
-enum AiRunStatus {
-  RUNNING
-  SUCCESS
-  FAILED
-  PARTIAL
-}
-
 // ---------------------------------------------------------------
 // 新闻来源表
 // ---------------------------------------------------------------
@@ -193,7 +239,7 @@ model NewsSource {
   type              NewsSourceType @default(RSS)
   url               String
   enabled           Boolean        @default(true)
-  newsType          String?        // 新闻类型，如 科技 / 财经 / 体育
+  newsType          String? // 新闻类型，如 科技 / 财经 / 体育
   defaultCategoryId String?
   defaultTags       String[]       @default([])
   config            Json?
@@ -219,7 +265,7 @@ model NewsItem {
   urlHash     String    @unique
   summary     String?   @db.Text
   content     String?   @db.Text
-  newsType    String?   // 新闻类型（继承自来源）
+  newsType    String? // 新闻类型（继承自来源）
   publishedAt DateTime?
   hotScore    Float?
   used        Boolean   @default(false)
@@ -235,29 +281,31 @@ model NewsItem {
 }
 
 // ---------------------------------------------------------------
-// AI 生成记录 / 草稿表
-// status: 0 = 草稿, 1 = 已发布
+// AI 生成记录 / 草稿表（status 为生命周期 / 审核状态）
 // ---------------------------------------------------------------
 model AiArticle {
-  id                  String    @id @default(cuid())
-  newsItemId          String?   @unique
+  id                  String          @id @default(cuid())
+  newsItemId          String?         @unique
   title               String
-  slug                String    @unique
-  summary             String?   @db.Text
-  content             String    @db.Text
-  keywords            String[]  @default([])
-  tags                String[]  @default([])
+  slug                String          @unique
+  summary             String?         @db.Text
+  content             String          @db.Text
+  keywords            String[]        @default([])
+  tags                String[]        @default([])
   suggestedCategoryId String?
-  status              Int       @default(0)
+  status              AiArticleStatus @default(DRAFT)
   sourceUrl           String?
   model               String?
   tokenUsage          Int?
   cost                Float?
-  error               String?   @db.Text
-  postId              String?   @unique
+  error               String?         @db.Text
+  reviewedBy          String?
+  reviewedAt          DateTime?
+  reviewNote          String?         @db.Text
+  postId              String?         @unique
   publishedAt         DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
   newsItem NewsItem? @relation(fields: [newsItemId], references: [id], onDelete: SetNull)
   category Category? @relation(fields: [suggestedCategoryId], references: [id], onDelete: SetNull)
@@ -291,32 +339,105 @@ model AiRunLog {
 // 音乐播放器模块
 // ===============================================================
 
-enum MusicStatus {
-  ACTIVE
-  DISABLED
-}
-
 // ---------------------------------------------------------------
 // 音乐表：前台播放器 + 后台音乐管理
 // category 为场景标签，可填文章分类 slug（如 tech / life）或特殊场景 home
+// categoryId 为可选的分类外键，用于更严格的数据关联（兼容旧的字符串标签）
 // ---------------------------------------------------------------
 model Music {
-  id         String      @id @default(cuid())
-  title      String
-  artist     String
-  cover      String?     // 封面地址
-  url        String      // 音乐文件地址
-  lyric      String?     // 歌词文件地址（.lrc / .txt）
-  category   String?     // 场景标签：文章分类 slug 或 home（首页背景音乐）
-  isRecommend Boolean    @default(false) // 推荐歌曲
-  isHomeBgm  Boolean     @default(false) // 是否作为首页背景音乐
-  playCount  Int         @default(0)
-  sort       Int         @default(0)
-  status     MusicStatus @default(ACTIVE)
-  createdAt  DateTime    @default(now())
-  updatedAt  DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  title       String
+  artist      String
+  cover       String? // 封面地址
+  url         String // 音乐文件地址
+  lyric       String? // 歌词文件地址（.lrc / .txt）
+  category    String? // 场景标签：文章分类 slug 或 home（首页背景音乐）
+  categoryId  String?
+  isRecommend Boolean     @default(false) // 推荐歌曲
+  isHomeBgm   Boolean     @default(false) // 是否作为首页背景音乐
+  playCount   Int         @default(0)
+  sort        Int         @default(0)
+  status      MusicStatus @default(ACTIVE)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  categoryRef Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
 
   @@index([status, sort])
   @@index([category])
+  @@index([categoryId])
   @@map("music")
+}
+
+// ===============================================================
+// 文件与媒体管理
+// ===============================================================
+
+// ---------------------------------------------------------------
+// 上传文件元信息表：追踪本地上传或对象存储文件
+// ---------------------------------------------------------------
+model Media {
+  id           String    @id @default(cuid())
+  kind         MediaKind
+  driver       String    @default("local") // local / s3 / oss / cos
+  storageKey   String?   @unique
+  url          String
+  originalName String?
+  mimeType     String?
+  size         Int?
+  hash         String?
+  uploaderId   String?
+  createdAt    DateTime  @default(now())
+
+  uploader User? @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+
+  @@index([kind, createdAt])
+  @@index([uploaderId])
+  @@map("media")
+}
+
+// ===============================================================
+// 安全与扩展
+// ===============================================================
+
+// ---------------------------------------------------------------
+// 操作审计日志表：记录后台关键操作，便于追溯
+// ---------------------------------------------------------------
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  actorName  String?
+  action     String
+  targetType String?
+  targetId   String?
+  result     String? // SUCCESS / FAILURE
+  ip         String?
+  requestId  String?
+  meta       Json?
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------
+// SEO 元信息表：站点级 / 实体级 SEO 覆盖配置
+// entityType: site / category / post；entityId 为 "" 表示站点级
+// ---------------------------------------------------------------
+model SeoMeta {
+  id          String   @id @default(cuid())
+  entityType  String
+  entityId    String   @default("")
+  title       String?
+  description String?  @db.Text
+  keywords    String[] @default([])
+  ogImage     String?
+  canonical   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([entityType, entityId])
+  @@index([entityType])
+  @@map("seo_meta")
 }

@@ -1,11 +1,12 @@
 /**
  * AI 文章数据访问层 + 发布逻辑
  */
+import { AiArticleStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { slugify, estimateReadingTime } from "@/lib/utils";
 
 /** AI 文章列表 */
-export async function listAiArticles(opts: { status?: number; page?: number; pageSize?: number } = {}) {
+export async function listAiArticles(opts: { status?: AiArticleStatus; page?: number; pageSize?: number } = {}) {
   const page = Math.max(1, opts.page ?? 1);
   const pageSize = Math.min(50, Math.max(1, opts.pageSize ?? 20));
   const where = opts.status === undefined ? {} : { status: opts.status };
@@ -99,7 +100,7 @@ export async function createAiArticle(data: {
       sourceUrl: data.sourceUrl || null,
       model: data.model,
       tokenUsage: data.tokenUsage,
-      status: 0,
+      status: AiArticleStatus.DRAFT,
     },
   });
 }
@@ -127,7 +128,7 @@ export async function uniqueAiSlug(base: string, excludeId?: string): Promise<st
 export async function publishAiArticle(id: string, authorId: string) {
   const article = await prisma.aiArticle.findUnique({ where: { id } });
   if (!article) throw new Error("AI 文章不存在");
-  if (article.status === 1 && article.postId) {
+  if (article.status === AiArticleStatus.PUBLISHED && article.postId) {
     const post = await prisma.post.findUnique({ where: { id: article.postId } });
     if (post) return post;
   }
@@ -166,7 +167,7 @@ export async function publishAiArticle(id: string, authorId: string) {
 
     await tx.aiArticle.update({
       where: { id: article.id },
-      data: { status: 1, postId: created.id, publishedAt: new Date() },
+      data: { status: AiArticleStatus.PUBLISHED, postId: created.id, publishedAt: new Date() },
     });
 
     return created;
