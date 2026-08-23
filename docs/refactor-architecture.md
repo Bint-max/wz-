@@ -343,3 +343,10 @@ interface StorageProvider {
 - 部署：新增 `Dockerfile`、应用级 `docker-compose.yml`、`scripts/init-db.sh`，环境变量补充 `STORAGE_DRIVER`
 
 > 待办：继续将 posts/comments/music/ai 模块迁移到分层结构；网络可用后接入 TanStack Query、Zustand、对象存储与分布式限流。
+
+**再补充（同一日）**
+
+- 完成 `posts`、`comments`、`music` 模块分层迁移，对应 API 路由改为薄适配层
+- 后端分层模块现已覆盖：categories / tags / settings / posts / comments / music / users / media / seo
+
+> 仍待迁移：AI 相关模块（articles/sources/settings/jobs）可继续沿用现有 `lib/ai` 与 `lib/jobs`，后续按同一规范逐步收拢。

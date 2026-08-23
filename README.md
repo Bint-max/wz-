@@ -76,7 +76,7 @@ personal-blog/
 
 后端按模块拆分为 `controller / service / repository / schema / entity`，Route Handler 只做协议适配；前端通过 `src/client/api.ts` 统一请求，并用 `src/client/hooks/*` 管理数据。
 
-目前已完成的试点模块：`categories`（后端分层 + 前端 `useCategories` hook + 分类管理页改造）。
+已完成分层迁移的模块：`categories`、`tags`、`settings`、`posts`、`comments`、`music`、`users`、`media`、`seo`。
 
 ## 🎵 音乐播放器模块
 

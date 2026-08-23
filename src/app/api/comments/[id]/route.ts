@@ -1,27 +1,21 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
 import { ok, fail, handleError } from "@/lib/api";
+import { commentController } from "@/server/comments/controller";
+import { commentStatusSchema } from "@/server/comments/schema";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
  * PATCH /api/comments/:id —— 更新评论状态（审核）
- * body: { status: "APPROVED" | "SPAM" | "REJECTED" | "PENDING" }
  */
 export async function PATCH(req: NextRequest, ctx: Ctx) {
   try {
-    await requireAdmin();
     const { id } = await ctx.params;
-    const body = await req.json();
-    const status = body?.status;
-    const allowed = ["PENDING", "APPROVED", "SPAM", "REJECTED"];
-    if (!allowed.includes(status)) return fail("无效的状态");
+    const body = await req.json().catch(() => ({}));
+    const parsed = commentStatusSchema.safeParse(body);
+    if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
 
-    const comment = await prisma.comment.update({
-      where: { id },
-      data: { status },
-    });
+    const comment = await commentController.updateStatus(id, parsed.data.status);
     return ok(comment);
   } catch (e) {
     return handleError(e);
@@ -33,9 +27,8 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
  */
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
   try {
-    await requireAdmin();
     const { id } = await ctx.params;
-    await prisma.comment.delete({ where: { id } });
+    await commentController.remove(id);
     return ok({ id });
   } catch (e) {
     return handleError(e);

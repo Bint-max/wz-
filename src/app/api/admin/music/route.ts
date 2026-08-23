@@ -1,18 +1,14 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
-import { musicSchema } from "@/lib/validation";
 import { ok, fail, handleError } from "@/lib/api";
+import { musicController } from "@/server/music/controller";
+import { musicCreateSchema } from "@/server/music/schema";
 
 /**
  * GET /api/admin/music —— 后台获取全部音乐（含已下架）
  */
 export async function GET() {
   try {
-    await requireAdmin();
-    const music = await prisma.music.findMany({
-      orderBy: [{ sort: "asc" }, { createdAt: "asc" }],
-    });
+    const music = await musicController.adminList();
     return ok(music);
   } catch (e) {
     return handleError(e);
@@ -24,27 +20,11 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin();
     const body = await req.json().catch(() => ({}));
-    const parsed = musicSchema.safeParse(body);
+    const parsed = musicCreateSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
-    const data = parsed.data;
 
-    const music = await prisma.music.create({
-      data: {
-        title: data.title,
-        artist: data.artist,
-        cover: data.cover || null,
-        url: data.url,
-        lyric: data.lyric || null,
-        category: data.category || null,
-        isRecommend: data.isRecommend,
-        isHomeBgm: data.isHomeBgm,
-        sort: data.sort,
-        status: data.status,
-      },
-    });
-
+    const music = await musicController.create(parsed.data);
     return ok(music, { status: 201 });
   } catch (e) {
     return handleError(e);

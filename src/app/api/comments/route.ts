@@ -1,28 +1,24 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
-import { ok, handleError } from "@/lib/api";
+import { CommentStatus } from "@prisma/client";
+import { ok, fail, handleError } from "@/lib/api";
+import { commentController } from "@/server/comments/controller";
 
 /**
  * GET /api/comments?status=&postId= —— 后台评论列表（需登录）
  */
 export async function GET(req: NextRequest) {
   try {
-    await requireAdmin();
     const { searchParams } = new URL(req.url);
-    const status = searchParams.get("status") || undefined;
+    const statusParam = searchParams.get("status");
+    let status: CommentStatus | undefined;
+    if (statusParam) {
+      const values = Object.values(CommentStatus) as string[];
+      if (!values.includes(statusParam)) return fail(`无效的状态，可选值：${values.join("/")}`);
+      status = statusParam as CommentStatus;
+    }
     const postId = searchParams.get("postId") || undefined;
 
-    const comments = await prisma.comment.findMany({
-      where: {
-        ...(status ? { status: status as "PENDING" | "APPROVED" | "SPAM" | "REJECTED" } : {}),
-        ...(postId ? { postId } : {}),
-      },
-      include: { post: { select: { title: true, slug: true } } },
-      orderBy: { createdAt: "desc" },
-      take: 200,
-    });
-
+    const comments = await commentController.adminList(status, postId);
     return ok(comments);
   } catch (e) {
     return handleError(e);

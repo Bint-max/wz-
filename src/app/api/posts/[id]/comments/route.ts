@@ -1,18 +1,9 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { commentSchema } from "@/lib/validation";
+import { NextRequest } from "next/server";
 import { ok, fail, handleError, getIp } from "@/lib/api";
+import { commentController } from "@/server/comments/controller";
+import { commentCreateSchema } from "@/server/comments/schema";
 
 type Ctx = { params: Promise<{ id: string }> };
-
-/** 简易反垃圾规则：链接过多或命中敏感词则判为 SPAM */
-function isSpam(content: string): boolean {
-  const links = content.match(/https?:\/\//g)?.length ?? 0;
-  const spamWords = ["赌博", "彩票", "代开发票", "办证", "sex", "casino"];
-  if (links > 3) return true;
-  if (spamWords.some((w) => content.toLowerCase().includes(w.toLowerCase()))) return true;
-  return false;
-}
 
 /**
  * GET /api/posts/:id/comments —— 获取已审核评论
@@ -20,10 +11,7 @@ function isSpam(content: string): boolean {
 export async function GET(_req: NextRequest, ctx: Ctx) {
   try {
     const { id } = await ctx.params;
-    const comments = await prisma.comment.findMany({
-      where: { postId: id, status: "APPROVED" },
-      orderBy: { createdAt: "desc" },
-    });
+    const comments = await commentController.listPublic(id);
     return ok(comments);
   } catch (e) {
     return handleError(e);
@@ -36,23 +24,17 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
 export async function POST(req: NextRequest, ctx: Ctx) {
   try {
     const { id } = await ctx.params;
-    const body = await req.json();
-    const parsed = commentSchema.safeParse(body);
+    const body = await req.json().catch(() => ({}));
+    const parsed = commentCreateSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
     const data = parsed.data;
 
-    const post = await prisma.post.findUnique({ where: { id }, select: { id: true } });
-    if (!post) return fail("文章不存在", 404);
-
-    const comment = await prisma.comment.create({
-      data: {
-        postId: id,
-        authorName: data.authorName,
-        authorEmail: data.authorEmail || null,
-        content: data.content,
-        ip: getIp(req),
-        status: isSpam(data.content) ? "SPAM" : "PENDING",
-      },
+    const comment = await commentController.create({
+      postId: id,
+      authorName: data.authorName,
+      authorEmail: data.authorEmail || null,
+      content: data.content,
+      ip: getIp(req),
     });
 
     return ok(comment, { status: 201 });
