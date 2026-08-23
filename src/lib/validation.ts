@@ -42,6 +42,7 @@ export const newsSourceSchema = z.object({
   type: z.enum(["RSS", "API"]).default("RSS"),
   url: z.string().url("请输入合法 URL"),
   enabled: z.boolean().optional().default(true),
+  newsType: z.string().max(30).optional().nullable(),
   defaultCategoryId: z.string().optional().nullable(),
   defaultTags: z.array(z.string()).optional().default([]),
   config: z.record(z.unknown()).optional().nullable(),
@@ -69,6 +70,7 @@ export const aiArticleUpdateSchema = z.object({
 export const aiGenerateSchema = z.object({
   newsId: z.string().optional(),
   limit: z.number().int().min(1).max(20).optional(),
+  type: z.string().max(30).optional(),
 });
 
 export const publishArticleSchema = z.object({

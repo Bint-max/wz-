@@ -13,10 +13,13 @@ import { createAiArticle, findAiArticleByNews } from "@/lib/ai/articles";
 import { notifyAdmin } from "@/lib/notify";
 import { slugify } from "@/lib/utils";
 
-/** 采集新闻（sourceId 可选，只采集指定来源） */
-export async function collectNews(sourceId?: string) {
+/** 采集新闻（sourceId / newsType 可选） */
+export async function collectNews(sourceId?: string, newsType?: string) {
   const sources = await prisma.newsSource.findMany({
-    where: { ...(sourceId ? { id: sourceId } : { enabled: true }) },
+    where: {
+      ...(sourceId ? { id: sourceId } : { enabled: true }),
+      ...(newsType ? { newsType } : {}),
+    },
   });
 
   let created = 0;
@@ -51,6 +54,7 @@ export async function collectNews(sourceId?: string) {
               urlHash,
               summary: item.summary,
               content: item.content,
+              newsType: source.newsType ?? null,
               publishedAt: item.publishedAt,
             },
           });
@@ -140,7 +144,9 @@ export async function generateFromNews(newsItemId: string) {
 }
 
 /** 批量生成：指定 newsId 或从最新新闻中取 limit 条 */
-export async function runGenerate(opts: { newsId?: string; limit?: number } = {}) {
+export async function runGenerate(
+  opts: { newsId?: string; limit?: number; type?: string } = {},
+) {
   const results = { success: 0, failed: 0, ids: [] as string[], errors: [] as string[] };
 
   if (opts.newsId) {
@@ -157,7 +163,7 @@ export async function runGenerate(opts: { newsId?: string; limit?: number } = {}
 
   const limit = Math.min(20, Math.max(1, opts.limit ?? 3));
   const candidates = await prisma.newsItem.findMany({
-    where: { used: false },
+    where: { used: false, ...(opts.type ? { newsType: opts.type } : {}) },
     orderBy: [{ publishedAt: "desc" }, { fetchedAt: "desc" }],
     take: limit * 3, // 多取一些，跳过已生成过的
     include: { source: true },

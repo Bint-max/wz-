@@ -12,6 +12,7 @@ type NewsSource = {
   type: "RSS" | "API";
   url: string;
   enabled: boolean;
+  newsType: string | null;
   defaultTags: string[];
   config: Record<string, unknown> | null;
   lastFetchedAt: string | null;
@@ -22,6 +23,7 @@ const empty = {
   type: "RSS" as "RSS" | "API",
   url: "",
   enabled: true,
+  newsType: "",
   defaultTags: "",
   configText: "",
 };
@@ -61,6 +63,7 @@ export function SourceManager() {
       type: form.type,
       url: form.url,
       enabled: form.enabled,
+      newsType: form.newsType || null,
       defaultTags: form.defaultTags.split(/[,，]/).map((s) => s.trim()).filter(Boolean),
       config,
     };
@@ -86,6 +89,7 @@ export function SourceManager() {
       type: s.type,
       url: s.url,
       enabled: s.enabled,
+      newsType: s.newsType ?? "",
       defaultTags: (s.defaultTags ?? []).join(", "),
       configText: s.config ? JSON.stringify(s.config) : "",
     });
@@ -122,6 +126,7 @@ export function SourceManager() {
             <option value="RSS">RSS</option>
             <option value="API">API</option>
           </select>
+          <input value={form.newsType} onChange={(e) => setForm({ ...form, newsType: e.target.value })} placeholder="新闻类型（如 科技/财经/体育）" className={inputCls} />
           <input value={form.defaultTags} onChange={(e) => setForm({ ...form, defaultTags: e.target.value })} placeholder="默认标签（逗号分隔）" className={inputCls} />
           <input value={form.configText} onChange={(e) => setForm({ ...form, configText: e.target.value })} placeholder="config JSON（可选）" className={`sm:col-span-2 ${inputCls}`} />
         </div>
@@ -160,6 +165,11 @@ export function SourceManager() {
                   </span>
                 </div>
                 <p className="truncate text-xs text-muted-foreground">{s.url}</p>
+                {s.newsType && (
+                  <span className="mt-0.5 inline-block rounded-full bg-pink-50 px-2 py-0.5 text-xs text-pink-500">
+                    {s.newsType}
+                  </span>
+                )}
                 {s.lastFetchedAt && (
                   <p className="text-xs text-muted-foreground">上次采集：{new Date(s.lastFetchedAt).toLocaleString("zh-CN")}</p>
                 )}

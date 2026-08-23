@@ -2,21 +2,34 @@
 
 /**
  * AI 流水线手动触发面板
- * 采集新闻 / 批量生成文章
+ * 采集新闻 / 批量生成文章（可按新闻类型筛选）
  */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { RefreshCw, Sparkles } from "lucide-react";
 
 export function PipelinePanel({ onDone }: { onDone?: () => void }) {
   const [limit, setLimit] = useState(3);
+  const [type, setType] = useState("");
+  const [types, setTypes] = useState<string[]>([]);
   const [loading, setLoading] = useState<"collect" | "generate" | null>(null);
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    fetch("/api/admin/ai/types")
+      .then((r) => r.json())
+      .then((d) => d.success && setTypes(d.data))
+      .catch(() => {});
+  }, []);
 
   const collect = async () => {
     setLoading("collect");
     setMessage("");
     try {
-      const res = await fetch("/api/admin/ai/collect", { method: "POST" });
+      const res = await fetch("/api/admin/ai/collect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: type || undefined }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "采集失败");
       setMessage(`采集完成：新增 ${data.data.created} 条，更新 ${data.data.updated} 条，失败 ${data.data.failed} 条 ✿`);
@@ -35,7 +48,7 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
       const res = await fetch("/api/admin/ai/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ limit }),
+        body: JSON.stringify({ limit, type: type || undefined }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "生成失败");
@@ -51,6 +64,19 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
   return (
     <div className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-5 shadow-soft dark:border-white/10">
       <div className="flex flex-wrap items-center gap-3">
+        <select
+          value={type}
+          onChange={(e) => setType(e.target.value)}
+          className="rounded-full border-2 border-pink-100 bg-background/70 px-3 py-2 text-sm outline-none focus:border-pink-300 dark:border-pink-500/20"
+        >
+          <option value="">全部类型</option>
+          {types.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
+
         <button
           onClick={collect}
           disabled={loading !== null}

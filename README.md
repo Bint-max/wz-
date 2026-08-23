@@ -11,7 +11,7 @@
 - **后台管理**：管理员登录、发布/编辑/删除文章、图片上传、数据看板
 - **评论系统**：评论提交、审核、删除、基础反垃圾
 - **个人信息页**：介绍、技术技能、工作经历、项目经历、联系方式
-- **AI 内容生产**：RSS/API 新闻采集、去重、AI 原创文章生成、审核发布、每日定时任务
+- **AI 内容生产**：RSS/API 新闻采集、**按新闻类型筛选**、去重、AI 原创文章生成、审核发布、每日定时任务
 - **额外功能**：深色/浅色切换、SEO、RSS、站点地图、图片懒加载、加载动画、GitHub 链接、响应式布局
 
 ## 🎀 卡哇伊主题（Kawaii）
@@ -87,11 +87,17 @@ AI 草稿（AiArticle，status=0）
 - AI 文章审核：`/admin/ai-articles`
 - 新闻来源配置：`/admin/ai-sources`
 
+### 新闻类型
+
+在「新闻来源」中可为每个来源指定**新闻类型**（如 科技 / 财经 / 体育 / 生活）。
+- 采集时新闻条目会自动继承来源类型；
+- 在 `/admin/ai-articles` 的采集/生成面板中可按类型筛选，只采集或生成指定类型的新闻。
+
 ### 手动操作
 
 在 `/admin/ai-articles` 页面：
-1. 点击「立即采集新闻」拉取已配置来源的最新新闻
-2. 输入数量后点击「生成文章」批量生成 AI 草稿
+1. （可选）选择新闻类型后点击「立即采集新闻」拉取对应来源的最新新闻
+2. 输入数量后点击「生成文章」按类型批量生成 AI 草稿
 3. 在列表中编辑、预览、修改标题/分类/标签
 4. 点击「发布」将文章同步到博客前台
 
@@ -116,8 +122,9 @@ pnpm scheduler
 | `GET/PUT/DELETE /api/admin/ai/articles/{id}` | AI 文章详情/编辑/删除 |
 | `GET/POST /api/admin/ai/sources` | 新闻来源列表/新增 |
 | `PUT/DELETE /api/admin/ai/sources/{id}` | 来源编辑/删除 |
-| `POST /api/admin/ai/collect` | 手动采集新闻 |
-| `POST /api/admin/ai/generate` | 手动 AI 生成 |
+| `POST /api/admin/ai/collect` | 手动采集新闻（body 支持 `sourceId`、`type`） |
+| `POST /api/admin/ai/generate` | 手动 AI 生成（body 支持 `newsId`、`limit`、`type`） |
+| `GET /api/admin/ai/types` | 获取已有新闻类型列表 |
 | `GET/POST /api/cron/ai-daily` | 定时入口（需 `CRON_SECRET`） |
 
 ## 🚀 本地运行

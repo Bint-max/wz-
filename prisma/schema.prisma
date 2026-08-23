@@ -193,6 +193,7 @@ model NewsSource {
   type              NewsSourceType @default(RSS)
   url               String
   enabled           Boolean        @default(true)
+  newsType          String?        // 新闻类型，如 科技 / 财经 / 体育
   defaultCategoryId String?
   defaultTags       String[]       @default([])
   config            Json?
@@ -203,6 +204,7 @@ model NewsSource {
   items NewsItem[]
 
   @@index([enabled])
+  @@index([newsType])
   @@map("news_sources")
 }
 
@@ -217,6 +219,7 @@ model NewsItem {
   urlHash     String    @unique
   summary     String?   @db.Text
   content     String?   @db.Text
+  newsType    String?   // 新闻类型（继承自来源）
   publishedAt DateTime?
   hotScore    Float?
   used        Boolean   @default(false)
@@ -226,6 +229,7 @@ model NewsItem {
   aiArticle AiArticle?
 
   @@index([sourceId])
+  @@index([newsType])
   @@index([publishedAt])
   @@map("news_items")
 }

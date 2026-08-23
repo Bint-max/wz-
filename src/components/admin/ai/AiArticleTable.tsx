@@ -17,7 +17,7 @@ type AiArticleItem = {
   createdAt: string;
   tags: string[];
   category: { name: string } | null;
-  newsItem: { title: string } | null;
+  newsItem: { title: string; newsType: string | null } | null;
   post: { slug: string } | null;
 };
 
@@ -130,6 +130,11 @@ export function AiArticleTable() {
               {item.newsItem && (
                 <p className="mt-1 line-clamp-1 text-xs text-muted-foreground">
                   来源新闻：{item.newsItem.title}
+                  {item.newsItem.newsType && (
+                    <span className="ml-2 rounded-full bg-pink-50 px-2 py-0.5 text-pink-500">
+                      {item.newsItem.newsType}
+                    </span>
+                  )}
                 </p>
               )}
               {item.tags.length > 0 && (

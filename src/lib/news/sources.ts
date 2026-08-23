@@ -12,6 +12,7 @@ export async function createNewsSource(data: {
   type: "RSS" | "API";
   url: string;
   enabled?: boolean;
+  newsType?: string | null;
   defaultCategoryId?: string | null;
   defaultTags?: string[];
   config?: Record<string, unknown> | null;
@@ -22,6 +23,7 @@ export async function createNewsSource(data: {
       type: data.type,
       url: data.url,
       enabled: data.enabled ?? true,
+      newsType: data.newsType || null,
       defaultCategoryId: data.defaultCategoryId || null,
       defaultTags: data.defaultTags ?? [],
       config: (data.config ?? undefined) as any,
@@ -36,6 +38,7 @@ export async function updateNewsSource(
     type?: "RSS" | "API";
     url?: string;
     enabled?: boolean;
+    newsType?: string | null;
     defaultCategoryId?: string | null;
     defaultTags?: string[];
     config?: Record<string, unknown> | null;
@@ -48,6 +51,7 @@ export async function updateNewsSource(
       type: data.type,
       url: data.url,
       enabled: data.enabled,
+      newsType: data.newsType,
       defaultCategoryId: data.defaultCategoryId,
       defaultTags: data.defaultTags,
       config: data.config === undefined ? undefined : (data.config as any),

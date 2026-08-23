@@ -14,7 +14,7 @@ export async function listAiArticles(opts: { status?: number; page?: number; pag
     prisma.aiArticle.findMany({
       where,
       include: {
-        newsItem: { select: { title: true, url: true, source: { select: { name: true } } } },
+        newsItem: { select: { title: true, url: true, newsType: true, source: { select: { name: true } } } },
         category: { select: { id: true, name: true, slug: true } },
         post: { select: { id: true, slug: true, published: true } },
       },
