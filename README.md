@@ -59,16 +59,24 @@ personal-blog/
 │   ├── app/
 │   │   ├── (public 页面)     # 首页/文章/分类/标签/搜索/关于
 │   │   ├── admin/           # 后台管理系统（含 ai-articles、ai-sources）
-│   │   ├── api/             # 后端 API（含 AI 模块接口）
+│   │   ├── api/             # 后端 API 薄适配层（调用 server 模块）
 │   │   ├── sitemap.ts       # 站点地图
 │   │   └── robots.ts        # 爬虫规则
 │   ├── components/          # 组件化 UI（含 music/ 播放器、admin/music-manager）
-│   ├── lib/                 # 工具、认证、数据访问、AI 模块
+│   ├── client/              # 前端数据层：api Client + hooks
+│   ├── server/              # 后端分层模块（controller/service/repository/schema）
+│   ├── lib/                 # 工具、认证、数据访问、AI 模块、统一错误
 │   └── types/               # 类型定义
 ├── .env.example             # 环境变量示例
 ├── docker-compose.yml       # 本地 PostgreSQL
 └── next.config.ts
 ```
+
+## 🧩 分层架构（渐进式重构中）
+
+后端按模块拆分为 `controller / service / repository / schema / entity`，Route Handler 只做协议适配；前端通过 `src/client/api.ts` 统一请求，并用 `src/client/hooks/*` 管理数据。
+
+目前已完成的试点模块：`categories`（后端分层 + 前端 `useCategories` hook + 分类管理页改造）。
 
 ## 🎵 音乐播放器模块
 

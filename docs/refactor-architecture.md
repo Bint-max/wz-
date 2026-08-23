@@ -307,3 +307,28 @@ interface StorageProvider {
 2. 前端状态方案：`TanStack Query + Zustand`
 3. 后端分层落地顺序：先选一个模块试点，再推广
 4. 数据库迁移：允许修改 `prisma/schema.prisma` 并生成 migration（保留 `db push` 兼容开发）
+
+---
+
+## 实施记录（持续更新）
+
+### 2026-08-23
+
+**第三阶段：数据库重构（已完成）**
+
+- `prisma/schema.prisma` 增加枚举与 `media`、`audit_logs`、`seo_meta` 等表
+- `AiArticle.status` 由 `Int(0/1)` 改为 `AiArticleStatus` 枚举
+- 生成基线迁移 `prisma/migrations/20260823020000_refactor_db/migration.sql`
+- 新增存量数据迁移脚本 `scripts/migrate-ai-status.sql`
+- 提交：`4f237aa`、`5eabd1b`
+
+**第四阶段：后端分层 + 前端数据层（进行中，单模块试点）**
+
+- 新增 `src/lib/errors.ts` 统一业务错误，`src/lib/api.ts` 识别 `AppError`
+- 完成 `categories` 模块试点：
+  - 后端：`src/server/categories/{entity,schema,repository,service,controller}.ts`
+  - 路由：`src/app/api/categories/route.ts`、`src/app/api/categories/[id]/route.ts` 改为薄适配层
+  - 前端：`src/client/api.ts`、`src/client/hooks/useCategories.ts`
+  - 组件：`src/components/admin/category-manager.tsx` 使用新数据层
+
+> 待办：确认试点规范后，将分层模式推广到 posts/tags/comments/music/ai 等模块；网络可用后接入 TanStack Query 与 Zustand。

@@ -1,9 +1,7 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
-import { categorySchema } from "@/lib/validation";
-import { slugify } from "@/lib/utils";
 import { ok, fail, handleError } from "@/lib/api";
+import { categoryController } from "@/server/categories/controller";
+import { categoryUpdateSchema } from "@/server/categories/schema";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -12,22 +10,12 @@ type Ctx = { params: Promise<{ id: string }> };
  */
 export async function PUT(req: NextRequest, ctx: Ctx) {
   try {
-    await requireAdmin();
     const { id } = await ctx.params;
-    const body = await req.json();
-    const parsed = categorySchema.safeParse(body);
+    const body = await req.json().catch(() => ({}));
+    const parsed = categoryUpdateSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
-    const data = parsed.data;
 
-    const category = await prisma.category.update({
-      where: { id },
-      data: {
-        name: data.name,
-        slug: data.slug ? slugify(data.slug) : undefined,
-        description: data.description || null,
-        sortOrder: data.sortOrder,
-      },
-    });
+    const category = await categoryController.update(id, parsed.data);
     return ok(category);
   } catch (e) {
     return handleError(e);
@@ -39,9 +27,8 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
  */
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
   try {
-    await requireAdmin();
     const { id } = await ctx.params;
-    await prisma.category.delete({ where: { id } });
+    await categoryController.remove(id);
     return ok({ id });
   } catch (e) {
     return handleError(e);

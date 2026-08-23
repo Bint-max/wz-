@@ -3,6 +3,7 @@
  */
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { AppError } from "./errors";
 
 /** 成功响应 */
 export function ok<T>(data: T, init?: ResponseInit) {
@@ -16,6 +17,9 @@ export function fail(message: string, status = 400) {
 
 /** 捕获常见异常并返回统一错误 */
 export function handleError(e: unknown) {
+  if (e instanceof AppError) {
+    return fail(e.message, e.status);
+  }
   if (e instanceof Error && e.message === "UNAUTHORIZED") {
     return fail("未登录或权限不足", 401);
   }
