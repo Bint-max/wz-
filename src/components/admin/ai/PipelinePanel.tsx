@@ -80,7 +80,7 @@ export function PipelinePanel({ onDone }: { onDone?: () => void }) {
         {message && <span className="text-sm text-muted-foreground">{message}</span>}
       </div>
       <p className="mt-3 text-xs text-muted-foreground">
-        生成前请先在「新闻来源」中配置 RSS/API 来源，并在 .env 中配置 OPENAI_API_KEY。
+        生成前请先在「新闻来源」中配置 RSS/API 来源，并在 .env 中配置 DEEPSEEK_API_KEY。
       </p>
     </div>
   );

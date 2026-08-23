@@ -35,7 +35,7 @@
 | 后端 | Next.js Route Handlers（API Routes）、JWT 认证（jose） |
 | 数据 | PostgreSQL、Prisma ORM |
 | 内容 | react-markdown、remark-gfm、rehype-highlight |
-| AI | OpenAI SDK（支持兼容服务） |
+| AI | DeepSeek（OpenAI 兼容接口） |
 | 采集/定时 | rss-parser、node-cron |
 | 部署 | Vercel 或 云服务器（Linux / Docker） |
 
@@ -137,7 +137,7 @@ cd personal-blog
 # 2. 安装依赖
 pnpm install
 
-# 3. 准备环境变量（含 OPENAI_API_KEY）
+# 3. 准备环境变量（含 DEEPSEEK_API_KEY）
 cp .env.example .env
 
 # 4. 启动 PostgreSQL 并初始化数据库（含种子数据）
@@ -185,9 +185,9 @@ pnpm db:reset     # 重置数据库并重新执行种子
 | `JWT_SECRET` | 登录 Token 签名密钥（生产必须更换） | 任意长随机字符串 |
 | `NEXT_PUBLIC_SITE_URL` | 站点地址（用于 SEO/RSS/站点地图） | `https://your-blog.example.com` |
 | `NEXT_PUBLIC_ALLOW_REGISTER` | 是否允许公开注册（当前版本保留字段） | `false` |
-| `OPENAI_API_KEY` | AI 生成密钥（不写死在代码） | `sk-...` |
-| `OPENAI_MODEL` | AI 模型 | `gpt-4o-mini` |
-| `OPENAI_BASE_URL` | OpenAI 兼容服务地址（可选） | `https://api.openai.com/v1` |
+| `DEEPSEEK_API_KEY` | DeepSeek API 密钥（不写死在代码） | `sk-...` |
+| `DEEPSEEK_MODEL` | AI 模型 | `deepseek-chat` |
+| `DEEPSEEK_BASE_URL` | DeepSeek API 地址 | `https://api.deepseek.com` |
 | `CRON_SECRET` | 定时接口鉴权密钥 | 任意长随机字符串 |
 | `NOTIFY_WEBHOOK_URL` | 管理员通知 Webhook（可选） | 飞书/钉钉/企业微信机器人地址 |
 | `AI_DAILY_LIMIT` | 每日自动生成文章数量 | `3` |
@@ -241,7 +241,7 @@ pnpm db:push && pnpm db:seed
 - 公开页面的数据查询做了「数据库不可用时的优雅降级」，因此即使数据库未启动，`pnpm build` 与公开页面也能正常渲染（内容为空）。后台 API 与后台页面不受此影响，会正常抛出错误。
 - 本项目使用 Next.js 15.1.9（已修复 CVE-2025-66478）与 React 19.1.2。
 - 关于 404：由于全局 `loading.tsx` 启用了流式渲染，`notFound()` 页面按 Next.js 官方设计返回 `200` 并附带 `noindex` 元标签，不会影响 SEO。
-- AI 生成接口需要 `OPENAI_API_KEY`；未配置时接口会返回明确错误，不会影响博客其它功能。
+- AI 生成接口需要 `DEEPSEEK_API_KEY`；未配置时接口会返回明确错误，不会影响博客其它功能。
 
 ## 📄 License
 

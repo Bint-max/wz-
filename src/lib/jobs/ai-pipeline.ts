@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { getSiteSettings } from "@/lib/settings";
 import { hashUrl } from "@/lib/news/dedupe";
 import { fetchNews } from "@/lib/news/rss";
-import { getOpenAIClient, getOpenAIModel } from "@/lib/ai/client";
+import { getAiClient, getAiModel } from "@/lib/ai/client";
 import { buildArticlePrompt, parseJsonFromText } from "@/lib/ai/prompts";
 import { aiArticleOutputSchema } from "@/lib/validation";
 import { createAiArticle, findAiArticleByNews } from "@/lib/ai/articles";
@@ -93,9 +93,9 @@ export async function generateFromNews(newsItemId: string) {
     settings,
   );
 
-  const client = getOpenAIClient();
+  const client = getAiClient();
   const completion = await client.chat.completions.create({
-    model: getOpenAIModel(),
+    model: getAiModel(),
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -130,7 +130,7 @@ export async function generateFromNews(newsItemId: string) {
     tags: output.tags,
     suggestedCategoryId,
     sourceUrl: news.url,
-    model: getOpenAIModel(),
+    model: getAiModel(),
     tokenUsage: completion.usage?.total_tokens,
   });
 
