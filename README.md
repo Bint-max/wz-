@@ -96,6 +96,8 @@ DeepSeek 的 API Key、模型与接口地址可在后台 **「AI 设置」**（`
 
 ### 新闻类型
 
+> 💡 关于「自动从微博 / 央视 / 知乎获取新闻」的可行方案，请阅读 [docs/ai-news-feasibility.md](./docs/ai-news-feasibility.md)（RSSHub + DeepSeek 组合方案）。
+
 在「新闻来源」中可为每个来源指定**新闻类型**（如 科技 / 财经 / 体育 / 生活）。
 - 采集时新闻条目会自动继承来源类型；
 - 在 `/admin/ai-articles` 的采集/生成面板中可按类型筛选，只采集或生成指定类型的新闻。
