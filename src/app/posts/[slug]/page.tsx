@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Clock, Eye, Tag, CalendarDays } from "lucide-react";
+import { Clock, Eye, Tag, CalendarDays, Sparkles } from "lucide-react";
 import { getPostBySlug, getPostMeta, getHotPosts } from "@/lib/data";
 import { formatDate } from "@/lib/utils";
 import { Markdown } from "@/components/ui/markdown";
 import { CommentSection } from "@/components/posts/comment-section";
-import { PostCard } from "@/components/home/post-card";
+import { CuteCard } from "@/components/home/CuteCard";
 
 export const revalidate = 60;
 
@@ -43,44 +43,48 @@ export default async function PostPage({ params }: Props) {
 
   return (
     <article className="page-enter mx-auto max-w-3xl px-4 py-8">
-      {/* 文章头部 */}
-      <header>
-        {post.category && (
-          <Link
-            href={`/categories/${post.category.slug}`}
-            className="text-sm font-medium text-primary hover:underline"
-          >
-            {post.category.name}
-          </Link>
-        )}
-        <h1 className="mt-3 text-3xl font-bold leading-tight sm:text-4xl">{post.title}</h1>
-        {post.excerpt && (
-          <p className="mt-4 text-lg text-muted-foreground">{post.excerpt}</p>
-        )}
+      {/* 文章头部：手账便签风格 */}
+      <header className="relative overflow-hidden rounded-[2rem] border-2 border-white/70 bg-card/90 p-7 shadow-soft dark:border-white/10">
+        <div className="absolute inset-0 bg-gradient-to-br from-pink-100/50 via-transparent to-violet-100/40 dark:from-pink-950/30 dark:to-violet-950/30" />
+        <Sparkles className="absolute right-5 top-5 h-5 w-5 text-pink-300" />
 
-        <div className="mt-5 flex flex-wrap items-center gap-4 border-b pb-6 text-sm text-muted-foreground">
-          <span className="flex items-center gap-1.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-              {post.author.name.slice(0, 1)}
+        <div className="relative">
+          {post.category && (
+            <Link
+              href={`/categories/${post.category.slug}`}
+              className="cute-chip inline-flex px-3 py-1 text-xs font-medium"
+            >
+              ✿ {post.category.name}
+            </Link>
+          )}
+          <h1 className="font-cute mt-4 text-3xl font-bold leading-tight text-foreground sm:text-4xl">
+            {post.title}
+          </h1>
+          {post.excerpt && (
+            <p className="mt-4 text-base leading-relaxed text-muted-foreground">{post.excerpt}</p>
+          )}
+
+          <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-2 border-t-2 border-dashed border-pink-100 pt-5 text-sm text-muted-foreground">
+            <span className="flex items-center gap-1.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-pink-300 to-violet-300 text-xs font-bold text-white">
+                {post.author.name.slice(0, 1)}
+              </span>
+              {post.author.name}
             </span>
-            {post.author.name}
-          </span>
-          <span className="flex items-center gap-1">
-            <CalendarDays className="h-4 w-4" />
-            {formatDate(post.publishedAt ?? post.createdAt)}
-          </span>
-          <span className="flex items-center gap-1">
-            <Clock className="h-4 w-4" /> {post.readingTime} 分钟
-          </span>
-          <span className="flex items-center gap-1">
-            <Eye className="h-4 w-4" /> {post.views} 阅读
-          </span>
+            <span className="flex items-center gap-1">📅 {formatDate(post.publishedAt ?? post.createdAt)}</span>
+            <span className="flex items-center gap-1">
+              <Clock className="h-4 w-4 text-pink-400" /> {post.readingTime} 分钟
+            </span>
+            <span className="flex items-center gap-1">
+              <Eye className="h-4 w-4 text-violet-400" /> {post.views} 阅读
+            </span>
+          </div>
         </div>
       </header>
 
       {/* 封面 */}
       {post.coverImage && (
-        <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-2xl">
+        <div className="relative mt-8 aspect-[16/9] w-full overflow-hidden rounded-[1.75rem] border-2 border-white/70 shadow-soft dark:border-white/10">
           <Image
             src={post.coverImage}
             alt={post.title}
@@ -92,22 +96,22 @@ export default async function PostPage({ params }: Props) {
         </div>
       )}
 
-      {/* 正文 */}
-      <div className="mt-8">
+      {/* 正文（保持 Markdown 专业排版） */}
+      <div className="mt-8 rounded-[1.75rem] border-2 border-white/70 bg-card/80 p-6 shadow-soft dark:border-white/10 sm:p-8">
         <Markdown content={post.content} />
       </div>
 
       {/* 标签 */}
       {post.tags.length > 0 && (
-        <div className="mt-10 flex flex-wrap items-center gap-2">
-          <Tag className="h-4 w-4 text-muted-foreground" />
+        <div className="mt-8 flex flex-wrap items-center gap-2">
+          <Tag className="h-4 w-4 text-pink-400" />
           {post.tags.map((tag) => (
             <Link
               key={tag.id}
               href={`/tags/${tag.slug}`}
-              className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground transition hover:bg-primary hover:text-primary-foreground"
+              className="cute-chip px-3 py-1 text-xs font-medium"
             >
-              {tag.name}
+              #{tag.name}
             </Link>
           ))}
         </div>
@@ -117,13 +121,15 @@ export default async function PostPage({ params }: Props) {
 
       {/* 相关推荐 */}
       <section className="mt-14">
-        <h2 className="mb-5 text-xl font-bold">相关阅读</h2>
+        <h2 className="font-cute mb-5 flex items-center gap-2 text-xl font-bold">
+          <Sparkles className="h-5 w-5 text-pink-400" /> 相关阅读
+        </h2>
         <div className="grid gap-5 sm:grid-cols-3">
           {related
             .filter((p) => p.slug !== post.slug)
             .slice(0, 3)
             .map((p) => (
-              <PostCard key={p.id} post={p} />
+              <CuteCard key={p.id} post={p} />
             ))}
         </div>
       </section>

@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 站点设置表单
+ * 站点设置表单（卡哇伊版）
  */
 import { useEffect, useState } from "react";
 import { Save } from "lucide-react";
@@ -36,9 +36,12 @@ export function SettingsForm() {
       body: JSON.stringify(values),
     });
     const data = await res.json();
-    setMessage(data.success ? "保存成功" : data.error ?? "保存失败");
+    setMessage(data.success ? "保存成功 ✿" : data.error ?? "保存失败");
     setSaving(false);
   };
+
+  const inputCls =
+    "w-full rounded-2xl border-2 border-pink-100 bg-background/70 px-3 py-2 text-sm outline-none focus:border-pink-300 dark:border-pink-500/20";
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -50,13 +53,13 @@ export function SettingsForm() {
               value={values[field.key] ?? ""}
               onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
               rows={3}
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className={inputCls}
             />
           ) : (
             <input
               value={values[field.key] ?? ""}
               onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
-              className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              className={inputCls}
             />
           )}
         </div>
@@ -66,7 +69,7 @@ export function SettingsForm() {
         <button
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+          className="cute-btn-pop flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-5 py-2.5 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03] disabled:opacity-50"
         >
           <Save className="h-4 w-4" /> {saving ? "保存中..." : "保存设置"}
         </button>

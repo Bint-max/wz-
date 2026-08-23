@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 后台侧边导航（移动端为顶部横向滚动）
+ * 后台侧边导航（卡哇伊版）
  */
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -36,10 +36,10 @@ export function AdminNav() {
             key={item.href}
             href={item.href}
             className={cn(
-              "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm transition",
+              "flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm transition",
               active
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:bg-muted",
+                ? "bg-gradient-to-r from-pink-400 to-violet-400 font-medium text-white shadow-soft"
+                : "text-muted-foreground hover:bg-pink-50",
             )}
           >
             <Icon className="h-4 w-4" />
@@ -58,7 +58,7 @@ export function AdminLogout() {
         await fetch("/api/auth/logout", { method: "POST" });
         window.location.href = "/admin/login";
       }}
-      className="flex w-full shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted"
+      className="flex w-full shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm text-muted-foreground transition hover:bg-pink-50 hover:text-pink-500"
     >
       <LogOut className="h-4 w-4" />
       退出登录

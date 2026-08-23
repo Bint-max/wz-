@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 搜索框（提交后跳转到 /search?q=...）
+ * 搜索框（卡哇伊版）
  */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -18,13 +18,13 @@ export function SearchForm({ initial = "" }: { initial?: string }) {
 
   return (
     <form onSubmit={onSubmit} className="relative w-full">
-      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-pink-300" />
       <input
         type="search"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        placeholder="搜索文章标题、内容..."
-        className="w-full rounded-full border bg-card py-2 pl-10 pr-4 text-sm outline-none transition focus:border-primary"
+        placeholder="搜搜看... ✧"
+        className="w-full rounded-full border-2 border-pink-100 bg-card/90 py-2.5 pl-10 pr-4 text-sm shadow-soft outline-none transition focus:border-pink-300 dark:border-pink-500/20"
       />
     </form>
   );

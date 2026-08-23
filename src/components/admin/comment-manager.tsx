@@ -1,12 +1,11 @@
 "use client";
 
 /**
- * 评论审核管理
+ * 评论审核管理（卡哇伊版）
  */
 import { useEffect, useState } from "react";
 import { Check, Trash2, X, ShieldAlert, RotateCcw } from "lucide-react";
-import { formatDateShort } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { formatDateShort, cn } from "@/lib/utils";
 
 type AdminComment = {
   id: string;
@@ -58,10 +57,10 @@ export function CommentManager() {
   };
 
   const badge: Record<string, string> = {
-    PENDING: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400",
-    APPROVED: "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400",
-    SPAM: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-400",
-    REJECTED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
+    PENDING: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    APPROVED: "bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-300",
+    SPAM: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300",
+    REJECTED: "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300",
   };
 
   return (
@@ -72,10 +71,10 @@ export function CommentManager() {
             key={t.key}
             onClick={() => setTab(t.key)}
             className={cn(
-              "shrink-0 rounded-full px-3 py-1.5 text-sm transition",
+              "shrink-0 rounded-full px-4 py-2 text-sm transition",
               tab === t.key
-                ? "bg-primary text-primary-foreground"
-                : "bg-card text-muted-foreground hover:bg-muted",
+                ? "bg-gradient-to-r from-pink-400 to-violet-400 font-medium text-white shadow-soft"
+                : "bg-card/90 text-muted-foreground hover:bg-pink-50",
             )}
           >
             {t.label}
@@ -86,17 +85,19 @@ export function CommentManager() {
       {loading ? (
         <p className="py-16 text-center text-sm text-muted-foreground">加载中...</p>
       ) : comments.length === 0 ? (
-        <p className="py-16 text-center text-sm text-muted-foreground">暂无评论</p>
+        <p className="rounded-[1.5rem] border-2 border-dashed border-pink-100 py-16 text-center text-sm text-muted-foreground">
+          暂无评论 ✿
+        </p>
       ) : (
         <div className="space-y-3">
           {comments.map((c) => (
-            <div key={c.id} className="rounded-2xl border bg-card p-4">
+            <div key={c.id} className="rounded-[1.5rem] border-2 border-white/70 bg-card/90 p-4 shadow-soft dark:border-white/10">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{c.authorName}</span>
                 {c.authorEmail && (
                   <span className="text-xs text-muted-foreground">{c.authorEmail}</span>
                 )}
-                <span className={cn("rounded-full px-2 py-0.5 text-xs", badge[c.status])}>
+                <span className={cn("rounded-full px-2.5 py-0.5 text-xs", badge[c.status])}>
                   {c.status}
                 </span>
                 <span className="ml-auto text-xs text-muted-foreground">
@@ -106,11 +107,11 @@ export function CommentManager() {
               <p className="mt-2 text-sm leading-relaxed">{c.content}</p>
               <p className="mt-2 text-xs text-muted-foreground">来自：{c.post.title}</p>
 
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex flex-wrap gap-2">
                 {c.status !== "APPROVED" && (
                   <button
                     onClick={() => updateStatus(c.id, "APPROVED")}
-                    className="flex items-center gap-1 rounded-lg bg-green-600 px-2.5 py-1.5 text-xs text-white transition hover:opacity-90"
+                    className="flex items-center gap-1 rounded-full bg-green-500 px-3 py-1.5 text-xs text-white transition hover:opacity-90"
                   >
                     <Check className="h-3.5 w-3.5" /> 通过
                   </button>
@@ -118,7 +119,7 @@ export function CommentManager() {
                 {c.status !== "SPAM" && (
                   <button
                     onClick={() => updateStatus(c.id, "SPAM")}
-                    className="flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs transition hover:bg-muted"
+                    className="flex items-center gap-1 rounded-full border-2 border-pink-100 px-3 py-1.5 text-xs text-muted-foreground transition hover:bg-pink-50"
                   >
                     <ShieldAlert className="h-3.5 w-3.5" /> 垃圾
                   </button>
@@ -126,7 +127,7 @@ export function CommentManager() {
                 {c.status !== "REJECTED" && (
                   <button
                     onClick={() => updateStatus(c.id, "REJECTED")}
-                    className="flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs transition hover:bg-muted"
+                    className="flex items-center gap-1 rounded-full border-2 border-pink-100 px-3 py-1.5 text-xs text-muted-foreground transition hover:bg-pink-50"
                   >
                     <X className="h-3.5 w-3.5" /> 拒绝
                   </button>
@@ -134,14 +135,14 @@ export function CommentManager() {
                 {c.status !== "PENDING" && (
                   <button
                     onClick={() => updateStatus(c.id, "PENDING")}
-                    className="flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs transition hover:bg-muted"
+                    className="flex items-center gap-1 rounded-full border-2 border-pink-100 px-3 py-1.5 text-xs text-muted-foreground transition hover:bg-pink-50"
                   >
                     <RotateCcw className="h-3.5 w-3.5" /> 待审
                   </button>
                 )}
                 <button
                   onClick={() => remove(c.id)}
-                  className="ml-auto flex items-center gap-1 rounded-lg border px-2.5 py-1.5 text-xs text-red-600 transition hover:bg-red-50 dark:hover:bg-red-950/40"
+                  className="ml-auto flex items-center gap-1 rounded-full border-2 border-red-100 px-3 py-1.5 text-xs text-red-500 transition hover:bg-red-50 dark:border-red-500/20"
                 >
                   <Trash2 className="h-3.5 w-3.5" /> 删除
                 </button>

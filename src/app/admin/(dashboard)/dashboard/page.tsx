@@ -37,7 +37,7 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">数据看板</h1>
+        <h1 className="font-cute text-2xl font-bold">数据看板</h1>
         <p className="text-sm text-muted-foreground">博客内容与访问概览</p>
       </div>
 
@@ -91,7 +91,7 @@ export default async function AdminDashboardPage() {
           </ol>
           <Link
             href="/admin/posts/new"
-            className="mt-4 flex items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90"
+            className="mt-4 flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-3 py-2 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03]"
           >
             <PenLine className="h-4 w-4" /> 写新文章
           </Link>

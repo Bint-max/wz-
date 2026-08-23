@@ -131,24 +131,24 @@ export function PostEditor({ initial }: { initial?: EditorPost }) {
 
   const labelCls = "mb-1 block text-sm font-medium";
   const inputCls =
-    "w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary";
+    "w-full rounded-2xl border-2 border-pink-100 bg-background/70 px-3 py-2 text-sm outline-none focus:border-pink-300 dark:border-pink-500/20";
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold">{isEdit ? "编辑文章" : "新建文章"}</h1>
+        <h1 className="font-cute text-2xl font-bold">{isEdit ? "编辑文章" : "新建文章"}</h1>
         <div className="flex items-center gap-2">
           <button
             onClick={() => onSave(false)}
             disabled={saving}
-            className="rounded-lg border px-4 py-2 text-sm transition hover:bg-muted disabled:opacity-50"
+            className="rounded-full border-2 border-pink-100 px-4 py-2 text-sm text-muted-foreground transition hover:bg-pink-50 disabled:opacity-50"
           >
             存草稿
           </button>
           <button
             onClick={() => onSave(true)}
             disabled={saving}
-            className="flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
+            className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-pink-400 to-violet-400 px-4 py-2 text-sm font-medium text-white shadow-soft transition hover:scale-[1.03] disabled:opacity-50"
           >
             <Save className="h-4 w-4" /> {saving ? "保存中..." : "发布"}
           </button>
@@ -197,8 +197,8 @@ export function PostEditor({ initial }: { initial?: EditorPost }) {
               <button
                 onClick={() => setTab("edit")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm transition",
-                  tab === "edit" ? "bg-muted font-medium" : "text-muted-foreground",
+                  "flex items-center gap-1.5 rounded-t-2xl px-3 py-2 text-sm transition",
+                  tab === "edit" ? "bg-pink-100 font-medium text-pink-600 dark:bg-pink-500/20" : "text-muted-foreground",
                 )}
               >
                 <PenLine className="h-4 w-4" /> 编辑
@@ -206,8 +206,8 @@ export function PostEditor({ initial }: { initial?: EditorPost }) {
               <button
                 onClick={() => setTab("preview")}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-t-lg px-3 py-2 text-sm transition",
-                  tab === "preview" ? "bg-muted font-medium" : "text-muted-foreground",
+                  "flex items-center gap-1.5 rounded-t-2xl px-3 py-2 text-sm transition",
+                  tab === "preview" ? "bg-pink-100 font-medium text-pink-600 dark:bg-pink-500/20" : "text-muted-foreground",
                 )}
               >
                 <Eye className="h-4 w-4" /> 实时预览
@@ -327,7 +327,7 @@ export function PostEditor({ initial }: { initial?: EditorPost }) {
                     className={cn(
                       "rounded-full border px-3 py-1 text-xs transition",
                       active
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-gradient-to-r from-pink-400 to-violet-400 text-white"
                         : "text-muted-foreground hover:bg-muted",
                     )}
                   >

@@ -13,6 +13,20 @@
 - **个人信息页**：介绍、技术技能、工作经历、项目经历、联系方式
 - **额外功能**：深色/浅色切换、SEO、RSS、站点地图、图片懒加载、加载动画、GitHub 链接、响应式布局
 
+
+## 🎀 卡哇伊主题（Kawaii）
+
+全站采用马卡龙配色（粉 / 浅紫 / 奶白 / 浅蓝 / 薄荷绿）与软萌圆角设计，主要交互组件：
+
+- `src/components/ui/BubbleCursor.tsx`：鼠标泡泡轨迹 + 圆形光标拖尾 + 点击星星爆炸（自动禁用触屏/减少动态效果场景）
+- `src/components/home/FloatingDecor.tsx`：页面漂浮装饰（星星、云朵、爱心、花朵、小动物）
+- `src/components/home/CuteCard.tsx`：手账/日记本风格文章卡片
+- `src/components/ui/CuteButton.tsx`：点击弹跳的动画按钮
+
+标题使用 Google Fonts 的「ZCOOL KuaiLe」可爱手写体，正文保留系统圆润字体以保证技术文章可读性。
+
+> 注意：`next/font/google` 会在 `pnpm build` 时联网下载字体。若本地构建环境无法联网，可改用 `src/app/layout.tsx` 中注释掉的系统字体方案（或预先配置好网络代理）。
+
 ## 🧰 技术栈
 
 | 层 | 技术 |

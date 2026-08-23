@@ -2,31 +2,39 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ---------- 主题色变量（浅色/深色） ---------- */
+/* =========================================================
+   卡哇伊主题配色（马卡龙 / 柔和治愈）
+   ========================================================= */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222 47% 11%;
+  --background: 36 100% 98%;       /* 奶白 */
+  --foreground: 322 22% 28%;       /* 柔和深紫灰 */
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --border: 214 32% 91%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 210 40% 98%;
-  --accent: 210 40% 96%;
+  --card-foreground: 322 22% 28%;
+  --muted: 330 35% 94%;            /* 浅粉 */
+  --muted-foreground: 325 14% 50%;
+  --border: 330 25% 90%;
+  --primary: 330 80% 70%;          /* 粉色 */
+  --primary-foreground: 0 0% 100%;
+  --accent: 270 70% 95%;           /* 浅紫 */
+
+  --kawaii-pink: 330 85% 75%;
+  --kawaii-purple: 270 80% 78%;
+  --kawaii-mint: 160 60% 72%;
+  --kawaii-sky: 200 90% 72%;
+  --kawaii-lemon: 45 95% 70%;
 }
 
 .dark {
-  --background: 222 47% 6%;
-  --foreground: 210 40% 96%;
-  --card: 222 47% 9%;
-  --card-foreground: 210 40% 96%;
-  --muted: 223 47% 11%;
-  --muted-foreground: 215 20% 65%;
-  --border: 216 34% 17%;
-  --primary: 217 91% 66%;
-  --primary-foreground: 222 47% 9%;
-  --accent: 216 34% 15%;
+  --background: 280 20% 13%;
+  --foreground: 330 35% 88%;
+  --card: 280 18% 17%;
+  --card-foreground: 330 35% 88%;
+  --muted: 280 16% 22%;
+  --muted-foreground: 320 15% 72%;
+  --border: 280 15% 28%;
+  --primary: 330 75% 72%;
+  --primary-foreground: 280 25% 12%;
+  --accent: 270 24% 24%;
 }
 
 * {
@@ -40,11 +48,155 @@ html {
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
+  /* 轻柔的马卡龙渐变背景 */
+  background-image:
+    radial-gradient(900px 500px at 8% -6%, hsl(330 85% 88% / 0.55), transparent 60%),
+    radial-gradient(800px 480px at 96% 0%, hsl(270 85% 90% / 0.55), transparent 55%),
+    radial-gradient(760px 520px at 50% 110%, hsl(160 70% 86% / 0.55), transparent 60%);
+  background-attachment: fixed;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ---------- 文章正文排版（Notion / Medium 风格） ---------- */
+/* 可爱圆润字体（由 next/font 注入 CSS 变量，若未加载则回退到系统圆体） */
+.font-cute {
+  font-family: var(--font-cute), "ZCOOL KuaiLe", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", ui-rounded, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* 正文默认字体 */
+body {
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Yuanti SC", ui-rounded, system-ui, sans-serif;
+}
+
+/* =========================================================
+   通用可爱元素
+   ========================================================= */
+.kawaii-gradient-text {
+  background: linear-gradient(90deg, hsl(330 85% 68%), hsl(270 80% 72%), hsl(200 85% 66%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.cute-chip {
+  border-radius: 9999px;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+.cute-chip:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+/* =========================================================
+   鼠标泡泡 / 星星 / 光标特效
+   ========================================================= */
+.kawaii-fx {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.kawaii-cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, hsl(330 90% 76%), hsl(270 85% 78%));
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.75), 0 0 14px hsl(330 90% 76% / 0.8);
+  transition: width 0.15s ease, height 0.15s ease;
+  will-change: transform;
+}
+
+.kawaii-cursor-trail {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 9999px;
+  background: hsl(200 90% 78% / 0.9);
+  box-shadow: 0 0 8px hsl(200 90% 70% / 0.8);
+  will-change: transform;
+}
+
+.kawaii-bubble {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  opacity: 0.85;
+  filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.8));
+  animation-name: bubble-rise;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes bubble-rise {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0.9; }
+  70% { opacity: 0.6; }
+  100% { transform: translate(var(--bubble-dx, 0px), -140px) scale(1.7); opacity: 0; }
+}
+
+.kawaii-star {
+  position: absolute;
+  pointer-events: none;
+  color: hsl(45 95% 65%);
+  text-shadow: 0 0 8px rgba(255, 210, 90, 0.9);
+  animation: star-burst 0.75s ease-out forwards;
+  will-change: transform, opacity;
+}
+
+@keyframes star-burst {
+  0% { transform: translate(0, 0) scale(0.3) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--star-dx, 0px), var(--star-dy, 0px)) scale(1) rotate(160deg); opacity: 0; }
+}
+
+/* 启用自定义光标时隐藏系统光标（文本输入保留 I 型光标） */
+body.kawaii-cursor-active,
+body.kawaii-cursor-active * {
+  cursor: none !important;
+}
+body.kawaii-cursor-active :where(input, textarea, select, [contenteditable="true"]) {
+  cursor: auto !important;
+}
+
+@media (pointer: coarse), (prefers-reduced-motion: reduce) {
+  .kawaii-cursor, .kawaii-cursor-trail, .kawaii-bubble, .kawaii-star {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   漂浮装饰
+   ========================================================= */
+.floating-decor {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.decor-item {
+  position: absolute;
+  animation: float 8s ease-in-out infinite;
+  filter: drop-shadow(0 4px 6px rgba(244, 114, 182, 0.18));
+  user-select: none;
+}
+
+/* =========================================================
+   文章正文排版（保留 Markdown 专业性）
+   ========================================================= */
 .prose-blog {
   line-height: 1.85;
   font-size: 1.0625rem;
@@ -74,13 +226,13 @@ body {
   margin: 1.25rem 0;
   background: hsl(var(--muted));
   color: hsl(var(--muted-foreground));
-  border-radius: 0 0.5rem 0.5rem 0;
+  border-radius: 0 0.75rem 0.75rem 0;
 }
 .prose-blog pre {
   margin: 1.25rem 0;
-  border-radius: 0.75rem;
+  border-radius: 0.875rem;
   overflow-x: auto;
-  background: #0d1117;
+  background: #1e1430;
   padding: 1rem 1.25rem;
   font-size: 0.875rem;
   line-height: 1.7;
@@ -96,12 +248,12 @@ body {
   font-size: 0.875em;
 }
 .prose-blog pre code {
-  color: #e6edf3;
+  color: #f2e9ff;
   background: transparent;
   padding: 0;
 }
 .prose-blog img {
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   margin: 1.25rem auto;
   display: block;
 }
@@ -127,18 +279,18 @@ body {
 }
 
 /* ---------- 代码高亮配色 ---------- */
-.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #ff7b72; }
-.hljs-string, .hljs-attr, .hljs-template-tag { color: #a5d6ff; }
-.hljs-title, .hljs-title.function_, .hljs-section { color: #d2a8ff; }
-.hljs-comment, .hljs-quote { color: #8b949e; font-style: italic; }
-.hljs-number, .hljs-symbol, .hljs-bullet { color: #79c0ff; }
-.hljs-built_in, .hljs-type, .hljs-class { color: #ffa657; }
-.hljs-variable, .hljs-template-variable, .hljs-name { color: #e6edf3; }
-.hljs-meta, .hljs-attribute { color: #79c0ff; }
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #ff9ecb; }
+.hljs-string, .hljs-attr, .hljs-template-tag { color: #a5e0ff; }
+.hljs-title, .hljs-title.function_, .hljs-section { color: #d8b4fe; }
+.hljs-comment, .hljs-quote { color: #a89bb8; font-style: italic; }
+.hljs-number, .hljs-symbol, .hljs-bullet { color: #8fd8f7; }
+.hljs-built_in, .hljs-type, .hljs-class { color: #ffd58a; }
+.hljs-variable, .hljs-template-variable, .hljs-name { color: #f2e9ff; }
+.hljs-meta, .hljs-attribute { color: #8fd8f7; }
 .hljs-emphasis { font-style: italic; }
 .hljs-strong { font-weight: 700; }
 
-/* ---------- 页面加载动画 ---------- */
+/* ---------- 页面进入动画 ---------- */
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -147,8 +299,27 @@ body {
   animation: page-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 系统字体栈（避免构建时下载在线字体） */
-.font-sans {
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+/* ---------- 卡片悬浮 / 图片旋转 ---------- */
+.cute-card-hover {
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+}
+.cute-card-hover:hover {
+  transform: translateY(-6px) rotate(-0.6deg);
+  box-shadow: 0 18px 40px rgba(244, 114, 182, 0.18);
+}
+.cute-img-spin {
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.group:hover .cute-img-spin {
+  transform: rotate(-2deg) scale(1.06);
+}
+
+/* ---------- 按钮弹跳 ---------- */
+.cute-btn-pop:active {
+  animation: pop 0.3s ease-out;
+}
+@keyframes pop {
+  0% { transform: scale(1); }
+  45% { transform: scale(0.9); }
+  100% { transform: scale(1); }
 }

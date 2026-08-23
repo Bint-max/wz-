@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 文章评论系统
+ * 文章评论系统（卡哇伊版）
  * - 展示已审核评论
  * - 提交新评论（进入待审核状态）
  */
@@ -9,6 +9,7 @@ import { useState } from "react";
 import { MessageSquare, Send } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 import type { CommentItem } from "@/types";
+import { CuteButton } from "@/components/ui/CuteButton";
 
 export function CommentSection({
   postId,
@@ -37,7 +38,7 @@ export function CommentSection({
       if (!res.ok) throw new Error(data.error ?? "提交失败");
       setContent("");
       setAuthorEmail("");
-      setMessage("评论已提交，审核通过后将展示，感谢你的留言！");
+      setMessage("评论已提交，审核通过后将展示，感谢你的留言！💗");
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "提交失败，请稍后再试");
     } finally {
@@ -46,9 +47,9 @@ export function CommentSection({
   };
 
   return (
-    <section className="mt-12 rounded-2xl border bg-card p-6">
-      <h2 className="flex items-center gap-2 text-lg font-semibold">
-        <MessageSquare className="h-5 w-5" /> 评论（{comments.length}）
+    <section className="mt-12 rounded-[1.75rem] border-2 border-white/70 bg-card/90 p-6 shadow-soft dark:border-white/10">
+      <h2 className="font-cute flex items-center gap-2 text-xl font-bold">
+        <MessageSquare className="h-5 w-5 text-pink-400" /> 评论（{comments.length}）
       </h2>
 
       <form onSubmit={onSubmit} className="mt-5 space-y-3">
@@ -59,47 +60,48 @@ export function CommentSection({
             onChange={(e) => setAuthorName(e.target.value)}
             placeholder="昵称 *"
             maxLength={50}
-            className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="rounded-2xl border-2 border-pink-100 bg-background/70 px-4 py-2.5 text-sm outline-none transition focus:border-pink-300 dark:border-pink-500/20"
           />
           <input
             type="email"
             value={authorEmail}
             onChange={(e) => setAuthorEmail(e.target.value)}
             placeholder="邮箱（选填，不会公开）"
-            className="rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            className="rounded-2xl border-2 border-pink-100 bg-background/70 px-4 py-2.5 text-sm outline-none transition focus:border-pink-300 dark:border-pink-500/20"
           />
         </div>
         <textarea
           required
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="写下你的想法..."
+          placeholder="写下你的想法... ✧"
           rows={4}
           maxLength={2000}
-          className="w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          className="w-full rounded-2xl border-2 border-pink-100 bg-background/70 px-4 py-2.5 text-sm outline-none transition focus:border-pink-300 dark:border-pink-500/20"
         />
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-xs text-muted-foreground">
-            {message ?? "文明发言，垃圾评论会被自动拦截。"}
+            {message ?? "文明发言，垃圾评论会被自动拦截 ✿"}
           </p>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-          >
+          <CuteButton type="submit" disabled={submitting}>
             <Send className="h-4 w-4" /> {submitting ? "提交中..." : "提交评论"}
-          </button>
+          </CuteButton>
         </div>
       </form>
 
       <div className="mt-8 space-y-5">
         {comments.length === 0 && (
-          <p className="text-sm text-muted-foreground">还没有评论，来抢沙发吧～</p>
+          <p className="rounded-2xl bg-pink-50/60 py-8 text-center text-sm text-muted-foreground">
+            还没有评论，来抢沙发吧～ 🍓
+          </p>
         )}
         {comments.map((comment) => (
-          <div key={comment.id} className="border-t pt-5 first:border-t-0 first:pt-0">
+          <div
+            key={comment.id}
+            className="rounded-2xl border-2 border-dashed border-pink-100 bg-background/50 p-4 dark:border-pink-500/20"
+          >
             <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-semibold text-primary">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-pink-200 to-violet-200 text-sm font-bold text-white">
                 {comment.authorName.slice(0, 1).toUpperCase()}
               </span>
               <div>
@@ -108,8 +110,9 @@ export function CommentSection({
                   {formatDate(comment.createdAt)}
                 </time>
               </div>
+              <span className="ml-auto text-lg opacity-60">💗</span>
             </div>
-            <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
               {comment.content}
             </p>
           </div>

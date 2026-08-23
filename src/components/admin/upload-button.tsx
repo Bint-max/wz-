@@ -36,7 +36,7 @@ export function UploadButton({ onUploaded }: { onUploaded: (url: string) => void
         type="button"
         onClick={() => inputRef.current?.click()}
         disabled={uploading}
-        className="flex items-center gap-1.5 rounded-lg border px-3 py-2 text-sm transition hover:bg-muted disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-full border-2 border-pink-100 px-3 py-2 text-sm text-muted-foreground transition hover:bg-pink-50 disabled:opacity-50"
       >
         <ImagePlus className="h-4 w-4" />
         {uploading ? "上传中..." : "上传图片"}

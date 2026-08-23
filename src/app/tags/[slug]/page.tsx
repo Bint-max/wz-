@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getPosts, getTags } from "@/lib/data";
-import { PostCard } from "@/components/home/post-card";
+import { CuteCard } from "@/components/home/CuteCard";
 import { Pagination } from "@/components/posts/pagination";
 
 export const revalidate = 60;
@@ -28,7 +28,7 @@ export default async function TagPage({ params, searchParams }: Props) {
   return (
     <div className="page-enter mx-auto max-w-5xl px-4 py-8">
       <header className="mb-8">
-        <h1 className="text-3xl font-bold">标签：{tag.name}</h1>
+        <h1 className="font-cute text-3xl font-bold">标签：{tag.name}</h1>
         <p className="mt-2 text-sm text-muted-foreground">共 {tag._count.posts} 篇文章</p>
       </header>
 
@@ -37,7 +37,7 @@ export default async function TagPage({ params, searchParams }: Props) {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <CuteCard key={post.id} post={post} />
           ))}
         </div>
       )}

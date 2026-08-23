@@ -1,12 +1,12 @@
 import { getSiteSettings } from "@/lib/settings";
 import { getLatestPosts, getHotPosts, getCategories, getTags, getSiteStats } from "@/lib/data";
 import { Hero } from "@/components/home/hero";
-import { PostCard } from "@/components/home/post-card";
+import { CuteCard } from "@/components/home/CuteCard";
 import { TagCloud } from "@/components/home/tag-cloud";
 import { VisitTracker } from "@/components/home/visit-tracker";
 import { SearchForm } from "@/components/posts/search-form";
 import Link from "next/link";
-import { Flame, FolderOpen } from "lucide-react";
+import { Flame, FolderOpen, Sparkles } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -30,14 +30,16 @@ export default async function HomePage() {
           {/* 主列：最新文章 */}
           <section>
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-xl font-bold">最新文章</h2>
+              <h2 className="font-cute flex items-center gap-2 text-xl font-bold">
+                <Sparkles className="h-5 w-5 text-pink-400" /> 最新文章
+              </h2>
               <Link href="/search?q=" className="text-sm text-muted-foreground hover:text-primary">
-                查看全部
+                看看全部 →
               </Link>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               {latest.map((post) => (
-                <PostCard key={post.id} post={post} priority={false} />
+                <CuteCard key={post.id} post={post} />
               ))}
             </div>
           </section>
@@ -46,14 +48,14 @@ export default async function HomePage() {
           <aside className="space-y-6">
             <SearchForm />
 
-            <section className="rounded-2xl border bg-card p-5">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                <Flame className="h-4 w-4 text-orange-500" /> 热门文章
+            <section className="rounded-[1.5rem] border-2 border-white/70 dark:border-white/10 bg-card/90 p-5 shadow-soft">
+              <h2 className="font-cute mb-3 flex items-center gap-2 text-base font-semibold">
+                <Flame className="h-4 w-4 text-orange-400" /> 热门文章
               </h2>
               <ol className="space-y-3">
                 {hot.map((post, i) => (
                   <li key={post.id} className="flex gap-3">
-                    <span className="text-lg font-bold text-muted-foreground/50">{i + 1}</span>
+                    <span className="font-cute text-lg font-bold text-pink-300">{i + 1}</span>
                     <Link
                       href={`/posts/${post.slug}`}
                       className="line-clamp-2 text-sm leading-snug hover:text-primary"
@@ -65,19 +67,19 @@ export default async function HomePage() {
               </ol>
             </section>
 
-            <section className="rounded-2xl border bg-card p-5">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold">
-                <FolderOpen className="h-4 w-4" /> 文章分类
+            <section className="rounded-[1.5rem] border-2 border-white/70 dark:border-white/10 bg-card/90 p-5 shadow-soft">
+              <h2 className="font-cute mb-3 flex items-center gap-2 text-base font-semibold">
+                <FolderOpen className="h-4 w-4 text-violet-400" /> 文章分类
               </h2>
               <div className="space-y-2">
                 {categories.map((c) => (
                   <Link
                     key={c.id}
                     href={`/categories/${c.slug}`}
-                    className="flex items-center justify-between text-sm text-muted-foreground transition hover:text-primary"
+                    className="flex items-center justify-between text-sm text-muted-foreground transition hover:translate-x-1 hover:text-primary"
                   >
-                    <span>{c.name}</span>
-                    <span className="text-xs opacity-60">{c._count.posts}</span>
+                    <span>🌸 {c.name}</span>
+                    <span className="rounded-full bg-pink-50 px-2 py-0.5 text-xs">{c._count.posts}</span>
                   </Link>
                 ))}
               </div>

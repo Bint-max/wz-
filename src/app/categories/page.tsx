@@ -10,7 +10,7 @@ export default async function CategoriesPage() {
 
   return (
     <div className="page-enter mx-auto max-w-5xl px-4 py-8">
-      <h1 className="text-3xl font-bold">文章分类</h1>
+      <h1 className="font-cute text-3xl font-bold">文章分类</h1>
       <p className="mt-2 text-sm text-muted-foreground">按主题浏览所有内容</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
