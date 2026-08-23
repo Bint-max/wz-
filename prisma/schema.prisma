@@ -1,0 +1,165 @@
+// 个人博客数据库模型设计
+// 使用 Prisma ORM 管理 PostgreSQL 数据库
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------
+// 用户表：后台管理员 / 作者
+// ---------------------------------------------------------------
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  avatar       String?
+  bio          String?   @db.Text
+  role         Role     @default(ADMIN)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("users")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+// ---------------------------------------------------------------
+// 分类表：技术分享 / 工作总结 / 学习笔记 / 项目经验 / 随笔
+// ---------------------------------------------------------------
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String?  @db.Text
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  posts Post[]
+
+  @@map("categories")
+}
+
+// ---------------------------------------------------------------
+// 标签表：与技术文章多对多关联
+// ---------------------------------------------------------------
+model Tag {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+
+  posts PostTag[]
+
+  @@map("tags")
+}
+
+// ---------------------------------------------------------------
+// 文章表
+// ---------------------------------------------------------------
+model Post {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  excerpt     String?   @db.Text
+  content     String    @db.Text
+  coverImage  String?
+  published   Boolean   @default(false)
+  featured    Boolean   @default(false)
+  views       Int       @default(0)
+  readingTime Int       @default(1)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  categoryId String?
+  author     User       @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String
+
+  tags     PostTag[]
+  comments Comment[]
+
+  @@index([published, publishedAt])
+  @@index([categoryId])
+  @@index([authorId])
+  @@map("posts")
+}
+
+// ---------------------------------------------------------------
+// 文章-标签 关联表
+// ---------------------------------------------------------------
+model PostTag {
+  postId String
+  tagId  String
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag  Tag  @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+  @@map("post_tags")
+}
+
+// ---------------------------------------------------------------
+// 评论表：支持审核、删除与简单反垃圾机制
+// ---------------------------------------------------------------
+model Comment {
+  id         String       @id @default(cuid())
+  postId     String
+  authorName String
+  authorEmail String?
+  content    String       @db.Text
+  status     CommentStatus @default(PENDING)
+  ip         String?
+  parentId   String?
+  createdAt  DateTime     @default(now())
+
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([postId])
+  @@index([status])
+  @@map("comments")
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  SPAM
+  REJECTED
+}
+
+// ---------------------------------------------------------------
+// 站点设置表：key-value 形式保存站点标题、简介、头像、GitHub 等
+// ---------------------------------------------------------------
+model SiteSetting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+// ---------------------------------------------------------------
+// 访问统计表：按天聚合全站访问量
+// ---------------------------------------------------------------
+model VisitStat {
+  id    String   @id @default(cuid())
+  date  DateTime @db.Date
+  count Int      @default(0)
+
+  @@unique([date])
+  @@map("visit_stats")
+}

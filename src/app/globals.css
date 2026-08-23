@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- 主题色变量（浅色/深色） ---------- */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --border: 214 32% 91%;
+  --primary: 217 91% 60%;
+  --primary-foreground: 210 40% 98%;
+  --accent: 210 40% 96%;
+}
+
+.dark {
+  --background: 222 47% 6%;
+  --foreground: 210 40% 96%;
+  --card: 222 47% 9%;
+  --card-foreground: 210 40% 96%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215 20% 65%;
+  --border: 216 34% 17%;
+  --primary: 217 91% 66%;
+  --primary-foreground: 222 47% 9%;
+  --accent: 216 34% 15%;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 文章正文排版（Notion / Medium 风格） ---------- */
+.prose-blog {
+  line-height: 1.85;
+  font-size: 1.0625rem;
+  color: hsl(var(--foreground));
+}
+.prose-blog h1,
+.prose-blog h2,
+.prose-blog h3,
+.prose-blog h4 {
+  font-weight: 700;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  scroll-margin-top: 5rem;
+}
+.prose-blog h1 { font-size: 1.9rem; }
+.prose-blog h2 { font-size: 1.55rem; }
+.prose-blog h3 { font-size: 1.3rem; }
+.prose-blog p { margin: 1rem 0; }
+.prose-blog a { color: hsl(var(--primary)); text-decoration: underline; text-underline-offset: 3px; }
+.prose-blog ul { list-style: disc; padding-left: 1.4rem; margin: 1rem 0; }
+.prose-blog ol { list-style: decimal; padding-left: 1.4rem; margin: 1rem 0; }
+.prose-blog li { margin: 0.35rem 0; }
+.prose-blog blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  padding: 0.25rem 1rem;
+  margin: 1.25rem 0;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+.prose-blog pre {
+  margin: 1.25rem 0;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  background: #0d1117;
+  padding: 1rem 1.25rem;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.prose-blog code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+.prose-blog :not(pre) > code {
+  background: hsl(var(--muted));
+  color: hsl(var(--primary));
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.375rem;
+  font-size: 0.875em;
+}
+.prose-blog pre code {
+  color: #e6edf3;
+  background: transparent;
+  padding: 0;
+}
+.prose-blog img {
+  border-radius: 0.75rem;
+  margin: 1.25rem auto;
+  display: block;
+}
+.prose-blog hr {
+  margin: 2rem 0;
+  border-color: hsl(var(--border));
+}
+.prose-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.925rem;
+}
+.prose-blog th,
+.prose-blog td {
+  border: 1px solid hsl(var(--border));
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+}
+.prose-blog th {
+  background: hsl(var(--muted));
+  font-weight: 600;
+}
+
+/* ---------- 代码高亮配色 ---------- */
+.hljs-keyword, .hljs-selector-tag, .hljs-literal { color: #ff7b72; }
+.hljs-string, .hljs-attr, .hljs-template-tag { color: #a5d6ff; }
+.hljs-title, .hljs-title.function_, .hljs-section { color: #d2a8ff; }
+.hljs-comment, .hljs-quote { color: #8b949e; font-style: italic; }
+.hljs-number, .hljs-symbol, .hljs-bullet { color: #79c0ff; }
+.hljs-built_in, .hljs-type, .hljs-class { color: #ffa657; }
+.hljs-variable, .hljs-template-variable, .hljs-name { color: #e6edf3; }
+.hljs-meta, .hljs-attribute { color: #79c0ff; }
+.hljs-emphasis { font-style: italic; }
+.hljs-strong { font-weight: 700; }
+
+/* ---------- 页面加载动画 ---------- */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: page-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 系统字体栈（避免构建时下载在线字体） */
+.font-sans {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+}

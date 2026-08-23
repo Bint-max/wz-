@@ -1,0 +1,8 @@
+# pnpm 构建脚本白名单：允许以下原生/关键依赖执行安装脚本
+allowBuilds:
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+  prisma: true
+  sharp: true
+  unrs-resolver: true
