@@ -222,19 +222,27 @@ pnpm scheduler
 # 1. 进入项目目录
 cd personal-blog
 
-# 2. 安装依赖
-pnpm install
-
-# 3. 准备环境变量（含 DEEPSEEK_API_KEY）
+# 2. 准备环境变量（含 DEEPSEEK_API_KEY）
 cp .env.example .env
 
-# 4. 启动 PostgreSQL 并初始化数据库（含种子数据）
+# 3. 启动本地 PostgreSQL（仅数据库，避免占用 3000 端口）
+docker compose up -d postgres
+
+# 4. 安装依赖
+pnpm install
+
+# 5. 初始化数据库结构并写入种子数据
 pnpm db:push
 pnpm db:seed
-# 或直接运行一键脚本：bash scripts/setup.sh
 
-# 5. 启动开发服务器
+# 6. 启动开发服务器
 pnpm dev
+```
+
+也可以直接使用一键初始化脚本（自动完成 3-5 步）：
+
+```bash
+bash scripts/setup.sh
 ```
 
 打开 http://localhost:3000 即可访问。
@@ -249,11 +257,13 @@ pnpm dev
 
 ## 🗄️ 数据库初始化
 
-本地使用 Docker 启动 PostgreSQL：
+本地开发只需启动 PostgreSQL（避免占用 3000 端口）：
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
+
+> 生产 / 单机部署想一次启动应用 + 数据库，请使用 `docker compose up -d --build`，详见下方「Docker Compose」部署章节。
 
 数据表由 Prisma schema 定义，核心数据表包括：
 
@@ -327,6 +337,8 @@ docker compose exec app sh -c "pnpm prisma migrate deploy && pnpm db:seed"
 
 应用默认运行在 `http://localhost:3000`，PostgreSQL 运行在 `5432`。
 
+> 启动后请用 `docker compose ps` 确认 `personal-blog-db` 为 `Up (healthy)`、`personal-blog-app` 为 `Up`。若数据库容器处于 `Exited`，应用容器仍会运行，但登录会因无法连接数据库而返回“登录失败”；重新执行 `docker compose up -d` 即可恢复。
+
 #### 方式二：裸机运行
 
 1. 安装 Node.js、pnpm、PostgreSQL。
@@ -344,6 +356,8 @@ docker compose exec app sh -c "pnpm prisma migrate deploy && pnpm db:seed"
 | 命令 | 说明 |
 | --- | --- |
 | `pnpm dev` | 启动开发服务器 |
+| `docker compose up -d postgres` | 仅启动本地开发数据库 |
+| `docker compose up -d --build` | 构建并启动应用 + PostgreSQL（生产/单机） |
 | `pnpm build` | 生产构建 |
 | `pnpm start` | 启动生产服务器 |
 | `pnpm lint` | 代码检查 |
