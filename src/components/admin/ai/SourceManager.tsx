@@ -121,7 +121,7 @@ export function SourceManager() {
         </h2>
         <div className="grid gap-2 sm:grid-cols-2">
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="来源名称" className={inputCls} />
-          <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="RSS/API 地址" className={inputCls} />
+          <input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} placeholder="RSS/API 地址（可省略 https://）" className={inputCls} />
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value as "RSS" | "API" })} className={inputCls}>
             <option value="RSS">RSS</option>
             <option value="API">API</option>

@@ -37,10 +37,24 @@ export const settingsSchema = z.record(z.string());
 
 // ---------- AI 内容生产模块 ----------
 
+const sourceUrlSchema = z
+  .string()
+  .trim()
+  .refine((v) => {
+    if (!v) return false;
+    const candidate = /^https?:\/\//i.test(v) ? v : `https://${v}`;
+    try {
+      const u = new URL(candidate);
+      return u.hostname.length > 0;
+    } catch {
+      return false;
+    }
+  }, "请输入合法 URL（可省略 http:// 或 https://）");
+
 export const newsSourceSchema = z.object({
   name: z.string().min(1, "来源名称不能为空").max(50),
   type: z.enum(["RSS", "API"]).default("RSS"),
-  url: z.string().url("请输入合法 URL"),
+  url: sourceUrlSchema,
   enabled: z.boolean().optional().default(true),
   newsType: z.string().max(30).optional().nullable(),
   defaultCategoryId: z.string().optional().nullable(),

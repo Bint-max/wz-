@@ -46,3 +46,10 @@ export function formatDateShort(date: Date | string | null | undefined): string 
 export function formatNumber(n: number): string {
   return n.toLocaleString("zh-CN");
 }
+
+/** 为 URL 补充协议：省略 http/https 时自动补全 https:// */
+export function ensureUrlScheme(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}

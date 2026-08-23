@@ -2,6 +2,7 @@
  * 新闻来源数据访问层
  */
 import { prisma } from "@/lib/prisma";
+import { ensureUrlScheme } from "@/lib/utils";
 
 export async function listNewsSources() {
   return prisma.newsSource.findMany({ orderBy: { createdAt: "asc" } });
@@ -21,7 +22,7 @@ export async function createNewsSource(data: {
     data: {
       name: data.name,
       type: data.type,
-      url: data.url,
+      url: ensureUrlScheme(data.url),
       enabled: data.enabled ?? true,
       newsType: data.newsType || null,
       defaultCategoryId: data.defaultCategoryId || null,
@@ -49,7 +50,7 @@ export async function updateNewsSource(
     data: {
       name: data.name,
       type: data.type,
-      url: data.url,
+      url: data.url === undefined ? undefined : ensureUrlScheme(data.url),
       enabled: data.enabled,
       newsType: data.newsType,
       defaultCategoryId: data.defaultCategoryId,
