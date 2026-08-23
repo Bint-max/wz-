@@ -16,6 +16,8 @@ export async function GET() {
       rsshubBaseUrl: config.rsshubBaseUrl,
       apiKeyMasked: maskApiKey(config.apiKey),
       hasApiKey: Boolean(config.apiKey),
+      weiboCookieMasked: maskApiKey(config.weiboCookie),
+      hasWeiboCookie: Boolean(config.weiboCookie),
     });
   } catch (e) {
     return handleError(e);
@@ -23,9 +25,8 @@ export async function GET() {
 }
 
 /**
- * POST /api/admin/ai/settings —— 保存 AI 配置
- * body: { apiKey?, model?, baseUrl?, rsshubBaseUrl? }
- * （字段为空表示保持不变）
+ * POST /api/admin/ai/settings —— 保存 AI 配置（可只传其中一部分，互不影响）
+ * body: { apiKey?, model?, baseUrl?, rsshubBaseUrl?, weiboCookie? }
  */
 export async function POST(req: NextRequest) {
   try {
@@ -36,17 +37,20 @@ export async function POST(req: NextRequest) {
     const baseUrl = typeof body?.baseUrl === "string" ? body.baseUrl.trim() : undefined;
     const rsshubBaseUrl =
       typeof body?.rsshubBaseUrl === "string" ? body.rsshubBaseUrl.trim() : undefined;
+    const weiboCookie =
+      typeof body?.weiboCookie === "string" ? body.weiboCookie.trim() : undefined;
 
     if (
       apiKey === undefined &&
       model === undefined &&
       baseUrl === undefined &&
-      rsshubBaseUrl === undefined
+      rsshubBaseUrl === undefined &&
+      weiboCookie === undefined
     ) {
       return fail("没有可保存的内容");
     }
 
-    const result = await saveAiConfig({ apiKey, model, baseUrl, rsshubBaseUrl });
+    const result = await saveAiConfig({ apiKey, model, baseUrl, rsshubBaseUrl, weiboCookie });
     return ok(result);
   } catch (e) {
     return handleError(e);

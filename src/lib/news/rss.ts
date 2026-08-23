@@ -114,6 +114,16 @@ export async function fetchNews(source: {
   url: string;
   config?: unknown;
 }): Promise<ParsedNewsItem[]> {
+  const config = source.config as { provider?: string } | null | undefined;
+
+  // 微博热搜直连：使用后台配置的 Cookie 自动获取
+  if (source.type === "API" && config?.provider === "weibo") {
+    const { getWeiboCookie } = await import("@/lib/ai/config");
+    const { fetchWeiboHot } = await import("./weibo");
+    const cookie = await getWeiboCookie();
+    return fetchWeiboHot(cookie);
+  }
+
   if (source.type === "API") {
     return fetchApi(source.url, source.config);
   }

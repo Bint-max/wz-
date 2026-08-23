@@ -89,7 +89,7 @@ AI 草稿（AiArticle，status=0）
 
 ### RSSHub 热门渠道（方案 A）
 
-系统支持**一键添加热门渠道**：少数派 / IT之家 / OSCHINA / 阮一峰（直接可用，无需 RSSHub），以及微博热搜 / 知乎热榜 / 央视新闻（需自建 RSSHub，微博还需 Cookie）：
+系统支持**一键添加热门渠道**：少数派 / IT之家 / OSCHINA / 阮一峰（直接可用，无需 RSSHub），以及知乎热榜 / 央视新闻（需自建 RSSHub）；微博热搜使用「AI 设置」中的微博 Cookie 直连获取：
 
 ```bash
 # 1. 自建 RSSHub（推荐，稳定且免费）
@@ -105,10 +105,10 @@ RSSHUB_BASE_URL="http://你的服务器IP:1200"
 
 ### DeepSeek 配置
 
-DeepSeek 的 API Key、模型与接口地址可在后台 **「AI 设置」**（`/admin/ai-settings`）直接配置：
-- API Key 加密存储在数据库，不会明文暴露；
-- 数据库未配置时回退读取 `.env` 中的 `DEEPSEEK_API_KEY` 等变量；
-- 无需手动修改服务器文件即可切换模型（`deepseek-chat` / `deepseek-reasoner`）。
+后台 **「AI 设置」**（`/admin/ai-settings`）分为三个独立配置卡片，各自独立保存、互不影响：
+- **DeepSeek 配置**：API Key / 模型 / 接口地址（Key 加密存储，未配置时回退 `.env`）；
+- **RSSHub 配置**：知乎 / 央视等渠道的数据源地址；
+- **微博 Cookie**：微博热搜使用该 Cookie 直连微博接口自动获取（加密存储），无需 RSSHub。
 
 ### 新闻类型
 

@@ -112,8 +112,15 @@ export function SourceManager({ rsshubBaseUrl = "https://rsshub.app" }: { rsshub
     load();
   };
 
-  /** 一键添加 RSSHub 热门渠道 */
-  const addTemplate = async (t: { name: string; url: string; newsType: string; tags: string[] }) => {
+  /** 一键添加热门渠道（RSSHub / 直连 / 微博 Cookie） */
+  const addTemplate = async (t: {
+    name: string;
+    url: string;
+    newsType: string;
+    tags: string[];
+    type?: "RSS" | "API";
+    config?: Record<string, unknown>;
+  }) => {
     setAdding(t.name);
     const exists = sources.some((s) => s.name === t.name);
     if (exists) {
@@ -127,11 +134,12 @@ export function SourceManager({ rsshubBaseUrl = "https://rsshub.app" }: { rsshub
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: t.name,
-        type: "RSS",
+        type: t.type ?? "RSS",
         url,
         enabled: true,
         newsType: t.newsType,
         defaultTags: t.tags,
+        config: t.config ?? null,
       }),
     });
     const data = await res.json();
@@ -143,12 +151,26 @@ export function SourceManager({ rsshubBaseUrl = "https://rsshub.app" }: { rsshub
     setAdding(null);
   };
 
-  const TEMPLATES = [
+  const TEMPLATES: {
+    name: string;
+    url: string;
+    newsType: string;
+    tags: string[];
+    type?: "RSS" | "API";
+    config?: Record<string, unknown>;
+  }[] = [
     { name: "少数派", url: "https://sspai.com/feed", newsType: "科技", tags: ["少数派"] },
     { name: "IT之家", url: "https://www.ithome.com/rss/", newsType: "科技", tags: ["IT之家"] },
     { name: "OSCHINA", url: "https://www.oschina.net/news/rss", newsType: "科技", tags: ["OSCHINA"] },
     { name: "阮一峰", url: "https://www.ruanyifeng.com/blog/atom.xml", newsType: "科技", tags: ["阮一峰"] },
-    { name: "微博热搜", url: "/weibo/search/hot", newsType: "热点", tags: ["微博", "热搜"] },
+    {
+      name: "微博热搜",
+      type: "API",
+      url: "https://weibo.com/ajax/side/hotSearch",
+      newsType: "热点",
+      tags: ["微博", "热搜"],
+      config: { provider: "weibo" },
+    },
     { name: "知乎热榜", url: "/zhihu/hotlist", newsType: "热点", tags: ["知乎"] },
     { name: "央视新闻", url: "/cctv/news", newsType: "要闻", tags: ["央视"] },
   ];
@@ -164,8 +186,8 @@ export function SourceManager({ rsshubBaseUrl = "https://rsshub.app" }: { rsshub
           <Wand2 className="h-4 w-4 text-pink-400" /> 一键添加热门渠道（RSSHub）
         </h2>
         <p className="mb-3 text-xs text-muted-foreground">
-          少数派 / IT之家 / OSCHINA / 阮一峰为直接可用的稳定源；微博 / 知乎 / 央视需要自建 RSSHub
-          （微博还需配置 Cookie），当前 RSSHub 地址：<code className="rounded bg-muted px-1">{rsshubBaseUrl}</code>
+          少数派 / IT之家 / OSCHINA / 阮一峰为直接可用的稳定源；微博热搜使用「AI 设置」中的微博 Cookie 直连获取；
+          知乎 / 央视需要自建 RSSHub，当前 RSSHub 地址：<code className="rounded bg-muted px-1">{rsshubBaseUrl}</code>
         </p>
         <div className="flex flex-wrap gap-2">
           {TEMPLATES.map((t) => (

@@ -11,6 +11,7 @@ const KEYS = {
   model: "deepseek_model",
   baseUrl: "deepseek_base_url",
   rsshubBaseUrl: "rsshub_base_url",
+  weiboCookie: "weibo_cookie",
 } as const;
 
 export type AiConfig = {
@@ -18,6 +19,7 @@ export type AiConfig = {
   model: string;
   baseUrl: string;
   rsshubBaseUrl: string;
+  weiboCookie: string;
 };
 
 /** 读取 AI 相关配置 */
@@ -36,12 +38,22 @@ export async function getAiConfig(): Promise<AiConfig> {
     }
   }
 
+  let weiboCookie = "";
+  if (map[KEYS.weiboCookie]) {
+    try {
+      weiboCookie = decryptText(map[KEYS.weiboCookie]);
+    } catch {
+      weiboCookie = "";
+    }
+  }
+
   return {
     apiKey,
     model: map[KEYS.model] || process.env.DEEPSEEK_MODEL || "deepseek-chat",
     baseUrl: map[KEYS.baseUrl] || process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com",
     rsshubBaseUrl:
       map[KEYS.rsshubBaseUrl] || process.env.RSSHUB_BASE_URL || "https://rsshub.app",
+    weiboCookie,
   };
 }
 
@@ -57,6 +69,7 @@ export async function saveAiConfig(data: {
   model?: string;
   baseUrl?: string;
   rsshubBaseUrl?: string;
+  weiboCookie?: string;
 }) {
   const current = await getAiConfig();
 
@@ -72,6 +85,9 @@ export async function saveAiConfig(data: {
   }
   if (data.rsshubBaseUrl !== undefined && data.rsshubBaseUrl !== "") {
     settings.push({ key: KEYS.rsshubBaseUrl, value: data.rsshubBaseUrl });
+  }
+  if (data.weiboCookie !== undefined && data.weiboCookie !== "") {
+    settings.push({ key: KEYS.weiboCookie, value: encryptText(data.weiboCookie) });
   }
 
   await prisma.$transaction(
@@ -89,7 +105,14 @@ export async function saveAiConfig(data: {
     baseUrl: data.baseUrl || current.baseUrl,
     rsshubBaseUrl: data.rsshubBaseUrl || current.rsshubBaseUrl,
     hasApiKey: Boolean(data.apiKey || current.apiKey),
+    hasWeiboCookie: Boolean(data.weiboCookie || current.weiboCookie),
   };
+}
+
+/** 获取微博 Cookie（采集时自动使用） */
+export async function getWeiboCookie(): Promise<string> {
+  const config = await getAiConfig();
+  return config.weiboCookie;
 }
 
 /** 获取脱敏后的 API Key（仅用于展示，如 sk-****abcd） */
