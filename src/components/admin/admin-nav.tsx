@@ -12,12 +12,16 @@ import {
   FolderOpen,
   Settings,
   LogOut,
+  Bot,
+  Rss,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items = [
   { href: "/admin/dashboard", label: "数据看板", icon: LayoutDashboard },
   { href: "/admin/posts", label: "文章管理", icon: FileText },
+  { href: "/admin/ai-articles", label: "AI 文章", icon: Bot },
+  { href: "/admin/ai-sources", label: "新闻来源", icon: Rss },
   { href: "/admin/comments", label: "评论审核", icon: MessageSquare },
   { href: "/admin/categories", label: "分类管理", icon: FolderOpen },
   { href: "/admin/settings", label: "站点设置", icon: Settings },

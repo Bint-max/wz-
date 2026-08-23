@@ -14,7 +14,9 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset --force",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "ai:daily": "tsx scripts/ai-daily.ts",
+    "scheduler": "tsx scripts/ai-scheduler.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
@@ -31,7 +33,10 @@
     "rehype-highlight": "^7.0.1",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.0",
-    "zod": "^3.24.1"
+    "zod": "^3.24.1",
+    "rss-parser": "^3.13.0",
+    "openai": "^4.73.0",
+    "node-cron": "^3.0.3"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -45,6 +50,7 @@
     "prisma": "^6.2.1",
     "tailwindcss": "^3.4.17",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "@types/node-cron": "^3.0.11"
   }
 }

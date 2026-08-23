@@ -34,3 +34,43 @@ export const tagSchema = z.object({
 });
 
 export const settingsSchema = z.record(z.string());
+
+// ---------- AI 内容生产模块 ----------
+
+export const newsSourceSchema = z.object({
+  name: z.string().min(1, "来源名称不能为空").max(50),
+  type: z.enum(["RSS", "API"]).default("RSS"),
+  url: z.string().url("请输入合法 URL"),
+  enabled: z.boolean().optional().default(true),
+  defaultCategoryId: z.string().optional().nullable(),
+  defaultTags: z.array(z.string()).optional().default([]),
+  config: z.record(z.unknown()).optional().nullable(),
+});
+
+export const aiArticleOutputSchema = z.object({
+  title: z.string().min(1).max(200),
+  summary: z.string().max(500).default(""),
+  content: z.string().min(1),
+  keywords: z.array(z.string()).default([]),
+  tags: z.array(z.string()).default([]),
+  category: z.string().optional().default(""),
+});
+
+export const aiArticleUpdateSchema = z.object({
+  title: z.string().min(1, "标题不能为空").max(200).optional(),
+  summary: z.string().max(500).optional().nullable(),
+  content: z.string().min(1, "正文不能为空").optional(),
+  keywords: z.array(z.string()).optional(),
+  tags: z.array(z.string()).optional(),
+  suggestedCategoryId: z.string().optional().nullable(),
+  sourceUrl: z.string().url().optional().nullable().or(z.literal("")),
+});
+
+export const aiGenerateSchema = z.object({
+  newsId: z.string().optional(),
+  limit: z.number().int().min(1).max(20).optional(),
+});
+
+export const publishArticleSchema = z.object({
+  id: z.string().min(1, "缺少文章 ID"),
+});

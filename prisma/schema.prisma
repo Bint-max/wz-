@@ -46,7 +46,8 @@ model Category {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  posts Post[]
+  posts      Post[]
+  aiArticles AiArticle[]
 
   @@map("categories")
 }
@@ -82,6 +83,9 @@ model Post {
   publishedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+
+  aiGenerated Boolean    @default(false) // 是否由 AI 生成
+  aiArticle   AiArticle?
 
   category   Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   categoryId String?
@@ -162,4 +166,119 @@ model VisitStat {
 
   @@unique([date])
   @@map("visit_stats")
+}
+
+// ===============================================================
+// AI 内容生产模块
+// ===============================================================
+
+enum NewsSourceType {
+  RSS
+  API
+}
+
+enum AiRunStatus {
+  RUNNING
+  SUCCESS
+  FAILED
+  PARTIAL
+}
+
+// ---------------------------------------------------------------
+// 新闻来源表
+// ---------------------------------------------------------------
+model NewsSource {
+  id                String         @id @default(cuid())
+  name              String
+  type              NewsSourceType @default(RSS)
+  url               String
+  enabled           Boolean        @default(true)
+  defaultCategoryId String?
+  defaultTags       String[]       @default([])
+  config            Json?
+  lastFetchedAt     DateTime?
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  items NewsItem[]
+
+  @@index([enabled])
+  @@map("news_sources")
+}
+
+// ---------------------------------------------------------------
+// 采集到的新闻表
+// ---------------------------------------------------------------
+model NewsItem {
+  id          String    @id @default(cuid())
+  sourceId    String
+  title       String
+  url         String
+  urlHash     String    @unique
+  summary     String?   @db.Text
+  content     String?   @db.Text
+  publishedAt DateTime?
+  hotScore    Float?
+  used        Boolean   @default(false)
+  fetchedAt   DateTime  @default(now())
+
+  source    NewsSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  aiArticle AiArticle?
+
+  @@index([sourceId])
+  @@index([publishedAt])
+  @@map("news_items")
+}
+
+// ---------------------------------------------------------------
+// AI 生成记录 / 草稿表
+// status: 0 = 草稿, 1 = 已发布
+// ---------------------------------------------------------------
+model AiArticle {
+  id                  String    @id @default(cuid())
+  newsItemId          String?   @unique
+  title               String
+  slug                String    @unique
+  summary             String?   @db.Text
+  content             String    @db.Text
+  keywords            String[]  @default([])
+  tags                String[]  @default([])
+  suggestedCategoryId String?
+  status              Int       @default(0)
+  sourceUrl           String?
+  model               String?
+  tokenUsage          Int?
+  cost                Float?
+  error               String?   @db.Text
+  postId              String?   @unique
+  publishedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  newsItem NewsItem? @relation(fields: [newsItemId], references: [id], onDelete: SetNull)
+  category Category? @relation(fields: [suggestedCategoryId], references: [id], onDelete: SetNull)
+  post     Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("ai_articles")
+}
+
+// ---------------------------------------------------------------
+// 任务运行日志表
+// ---------------------------------------------------------------
+model AiRunLog {
+  id           String      @id @default(cuid())
+  runType      String
+  status       AiRunStatus @default(RUNNING)
+  startedAt    DateTime    @default(now())
+  endedAt      DateTime?
+  totalItems   Int         @default(0)
+  successCount Int         @default(0)
+  errorCount   Int         @default(0)
+  message      String?     @db.Text
+  createdAt    DateTime    @default(now())
+
+  @@index([runType, createdAt])
+  @@map("ai_run_logs")
 }
