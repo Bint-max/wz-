@@ -4,6 +4,7 @@ import path from "path";
 import { randomUUID } from "crypto";
 import { requireAdmin } from "@/lib/auth";
 import { fail, handleError } from "@/lib/api";
+import { mediaService } from "@/server/media/service";
 
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/gif", "image/svg+xml"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
@@ -14,7 +15,7 @@ const MAX_SIZE = 5 * 1024 * 1024; // 5MB
  */
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin();
+    const admin = await requireAdmin();
     const form = await req.formData();
     const file = form.get("file");
     if (!(file instanceof File)) return fail("请选择要上传的图片");
@@ -28,6 +29,15 @@ export async function POST(req: NextRequest) {
     const dir = path.join(process.cwd(), "public", "uploads");
     await mkdir(dir, { recursive: true });
     await writeFile(path.join(dir, filename), buffer);
+
+    await mediaService.record({
+      kind: "IMAGE",
+      url: `/uploads/${filename}`,
+      originalName: file.name,
+      mimeType: file.type || null,
+      size: file.size,
+      uploaderId: admin.id,
+    });
 
     return NextResponse.json({ success: true, data: { url: `/uploads/${filename}` } });
   } catch (e) {

@@ -1,19 +1,14 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/auth";
-import { tagSchema } from "@/lib/validation";
-import { slugify } from "@/lib/utils";
 import { ok, fail, handleError } from "@/lib/api";
+import { tagController } from "@/server/tags/controller";
+import { tagCreateSchema } from "@/server/tags/schema";
 
 /**
- * GET /api/tags —— 获取标签列表
+ * GET /api/tags —— 获取标签列表（含文章数）
  */
 export async function GET() {
   try {
-    const tags = await prisma.tag.findMany({
-      orderBy: { name: "asc" },
-      include: { _count: { select: { posts: { where: { post: { is: { published: true } } } } } } },
-    });
+    const tags = await tagController.list();
     return ok(tags);
   } catch (e) {
     return handleError(e);
@@ -25,15 +20,11 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
   try {
-    await requireAdmin();
-    const body = await req.json();
-    const parsed = tagSchema.safeParse(body);
+    const body = await req.json().catch(() => ({}));
+    const parsed = tagCreateSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
-    const data = parsed.data;
 
-    const tag = await prisma.tag.create({
-      data: { name: data.name, slug: slugify(data.name) },
-    });
+    const tag = await tagController.create(parsed.data);
     return ok(tag, { status: 201 });
   } catch (e) {
     return handleError(e);

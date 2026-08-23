@@ -332,3 +332,14 @@ interface StorageProvider {
   - 组件：`src/components/admin/category-manager.tsx` 使用新数据层
 
 > 待办：确认试点规范后，将分层模式推广到 posts/tags/comments/music/ai 等模块；网络可用后接入 TanStack Query 与 Zustand。
+
+**持续补充（同一日）**
+
+- 推广分层模块：`tags`、`settings`、`users`、`media`、`seo`
+- 新增前端 hooks：`useTags`、`useSettings`、`useUsers`、`useMedia`、`useSeo`
+- 新增后台页面：用户管理 `/admin/users`、文件管理 `/admin/media`、SEO 配置 `/admin/seo`
+- 文件上传路由开始写入 `media` 表元信息
+- 安全基础能力：内存限流器（登录防爆破）、审计日志写入 `audit_logs`
+- 部署：新增 `Dockerfile`、应用级 `docker-compose.yml`、`scripts/init-db.sh`，环境变量补充 `STORAGE_DRIVER`
+
+> 待办：继续将 posts/comments/music/ai 模块迁移到分层结构；网络可用后接入 TanStack Query、Zustand、对象存储与分布式限流。

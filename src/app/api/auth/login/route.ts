@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyCredentials, signToken, COOKIE_NAME } from "@/lib/auth";
+import { getIp } from "@/lib/api";
+import { rateLimit } from "@/lib/rate-limit";
 
 /**
  * 管理员登录
@@ -11,6 +13,15 @@ export async function POST(req: NextRequest) {
     const { email, password } = body ?? {};
     if (!email || !password) {
       return NextResponse.json({ success: false, error: "请输入邮箱和密码" }, { status: 400 });
+    }
+
+    const ip = getIp(req);
+    const limited = rateLimit(`login:${ip}:${String(email).toLowerCase()}`, 5, 60_000);
+    if (!limited.ok) {
+      return NextResponse.json(
+        { success: false, error: "登录尝试过于频繁，请稍后再试" },
+        { status: 429 },
+      );
     }
 
     const user = await verifyCredentials(String(email), String(password));

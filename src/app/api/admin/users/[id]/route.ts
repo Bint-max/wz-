@@ -1,34 +1,34 @@
 import { NextRequest } from "next/server";
 import { ok, fail, handleError } from "@/lib/api";
-import { tagController } from "@/server/tags/controller";
-import { tagUpdateSchema } from "@/server/tags/schema";
+import { userController } from "@/server/users/controller";
+import { userUpdateSchema } from "@/server/users/schema";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 /**
- * PUT /api/tags/:id —— 更新标签
+ * PUT /api/admin/users/:id —— 更新用户（需管理员）
  */
 export async function PUT(req: NextRequest, ctx: Ctx) {
   try {
     const { id } = await ctx.params;
     const body = await req.json().catch(() => ({}));
-    const parsed = tagUpdateSchema.safeParse(body);
+    const parsed = userUpdateSchema.safeParse(body);
     if (!parsed.success) return fail(parsed.error.issues[0]?.message ?? "参数错误");
 
-    const tag = await tagController.update(id, parsed.data);
-    return ok(tag);
+    const user = await userController.update(id, parsed.data);
+    return ok(user);
   } catch (e) {
     return handleError(e);
   }
 }
 
 /**
- * DELETE /api/tags/:id —— 删除标签
+ * DELETE /api/admin/users/:id —— 删除用户（需管理员）
  */
 export async function DELETE(_req: NextRequest, ctx: Ctx) {
   try {
     const { id } = await ctx.params;
-    await tagController.remove(id);
+    await userController.remove(id);
     return ok({ id });
   } catch (e) {
     return handleError(e);

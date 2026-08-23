@@ -3,8 +3,9 @@
 /**
  * 站点设置表单（卡哇伊版）
  */
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Save } from "lucide-react";
+import { useSettings } from "@/client/hooks/useSettings";
 
 const fields = [
   { key: "site_name", label: "站点名称" },
@@ -17,31 +18,33 @@ const fields = [
 ];
 
 export function SettingsForm() {
-  const [values, setValues] = useState<Record<string, string>>({});
+  const { settings, setSettings, loading, error, updateSettings } = useSettings();
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((d) => d.success && setValues(d.data));
-  }, []);
 
   const save = async () => {
     setSaving(true);
     setMessage("");
-    const res = await fetch("/api/settings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(values),
-    });
-    const data = await res.json();
-    setMessage(data.success ? "保存成功 ✿" : data.error ?? "保存失败");
-    setSaving(false);
+    try {
+      await updateSettings(settings);
+      setMessage("保存成功 ✿");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "保存失败");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const inputCls =
     "w-full rounded-2xl border-2 border-pink-100 bg-background/70 px-3 py-2 text-sm outline-none focus:border-pink-300 dark:border-pink-500/20";
+
+  if (loading) {
+    return <p className="py-16 text-center text-sm text-muted-foreground">加载中...</p>;
+  }
+
+  if (error) {
+    return <p className="py-16 text-center text-sm text-muted-foreground">{error}</p>;
+  }
 
   return (
     <div className="max-w-2xl space-y-4">
@@ -50,15 +53,15 @@ export function SettingsForm() {
           <label className="mb-1 block text-sm font-medium">{field.label}</label>
           {field.key === "site_description" || field.key === "bio" ? (
             <textarea
-              value={values[field.key] ?? ""}
-              onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+              value={settings[field.key] ?? ""}
+              onChange={(e) => setSettings((v) => ({ ...v, [field.key]: e.target.value }))}
               rows={3}
               className={inputCls}
             />
           ) : (
             <input
-              value={values[field.key] ?? ""}
-              onChange={(e) => setValues((v) => ({ ...v, [field.key]: e.target.value }))}
+              value={settings[field.key] ?? ""}
+              onChange={(e) => setSettings((v) => ({ ...v, [field.key]: e.target.value }))}
               className={inputCls}
             />
           )}

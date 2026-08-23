@@ -8,7 +8,7 @@
 
 - **首页**：个人头像、简介、最新文章、热门文章、技术标签、访问统计
 - **文章系统**：Markdown 编辑、实时预览、代码高亮、分类/标签、搜索、阅读量统计
-- **后台管理**：管理员登录、发布/编辑/删除文章、图片上传、数据看板、音乐管理（歌曲/封面/歌词上传、排序、推荐/首页歌单）
+- **后台管理**：管理员登录、文章/AI 文章管理、音乐管理、评论审核、分类管理、**用户与权限管理**、**文件管理**、**SEO 配置**、数据看板
 - **评论系统**：评论提交、审核、删除、基础反垃圾
 - **个人信息页**：介绍、技术技能、工作经历、项目经历、联系方式
 - **全局音乐播放器**：底部悬浮播放器，支持播放/暂停/切歌/音量/进度、顺序/单曲循环/随机播放、封面旋转、LRC 歌词滚动高亮、播放列表与进度持久化、深色模式适配
@@ -294,6 +294,7 @@ pnpm db:reset     # 重置数据库并重新执行种子
 | `NOTIFY_WEBHOOK_URL` | 管理员通知 Webhook（可选） | 飞书/钉钉/企业微信机器人地址 |
 | `AI_DAILY_LIMIT` | 每日自动生成文章数量 | `3` |
 | `RSSHUB_BASE_URL` | RSSHub 地址（可选，默认公共实例；也可在后台「AI 设置」配置） | `http://your-ip:1200` |
+| `STORAGE_DRIVER` | 文件存储驱动：`local` / `s3` / `oss` / `cos` | `local` |
 
 ## ☁️ 部署
 
@@ -314,8 +315,22 @@ pnpm db:push && pnpm db:seed
 
 ### 云服务器（Linux / Docker）
 
+#### 方式一：Docker Compose（推荐）
+
+```bash
+cp .env.example .env
+# 编辑 .env，至少修改 JWT_SECRET
+docker compose up -d --build
+# 首次启动后初始化数据库
+docker compose exec app sh -c "pnpm prisma migrate deploy && pnpm db:seed"
+```
+
+应用默认运行在 `http://localhost:3000`，PostgreSQL 运行在 `5432`。
+
+#### 方式二：裸机运行
+
 1. 安装 Node.js、pnpm、PostgreSQL。
-2. 拉取代码，配置 `.env`，执行 `pnpm install && pnpm db:push && pnpm db:seed`。
+2. 拉取代码，配置 `.env`，执行 `pnpm install && pnpm prisma migrate deploy && pnpm db:seed`。
 3. 构建并启动：`pnpm build && pnpm start`（建议用 pm2 守护）。
 4. 定时任务使用 `pnpm scheduler`（node-cron）或系统 crontab 调用 `pnpm ai:daily`。
 5. 可选 Nginx 反向代理 + certbot 配置 HTTPS。
@@ -335,6 +350,7 @@ pnpm db:push && pnpm db:seed
 | `pnpm db:generate` | 生成 Prisma Client |
 | `pnpm db:push` | 同步数据库结构 |
 | `pnpm db:seed` | 写入种子数据 |
+| `bash scripts/init-db.sh` | 应用迁移并写入种子数据 |
 | `pnpm db:studio` | 打开数据库图形界面 |
 | `pnpm ai:daily` | 执行一次 AI 每日流水线 |
 | `pnpm scheduler` | 启动 AI 每日定时任务（node-cron） |

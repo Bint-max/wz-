@@ -16,6 +16,9 @@ import {
   Bot,
   Rss,
   KeyRound,
+  Users as UsersIcon,
+  HardDrive,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +32,9 @@ const items = [
   { href: "/admin/categories", label: "分类管理", icon: FolderOpen },
   { href: "/admin/music", label: "音乐管理", icon: Music2 },
   { href: "/admin/settings", label: "站点设置", icon: Settings },
+  { href: "/admin/seo", label: "SEO 配置", icon: Globe },
+  { href: "/admin/users", label: "用户管理", icon: UsersIcon },
+  { href: "/admin/media", label: "文件管理", icon: HardDrive },
 ];
 
 export function AdminNav() {
