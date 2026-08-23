@@ -269,7 +269,7 @@ pnpm db:studio    # 打开 Prisma Studio 图形界面
 pnpm db:reset     # 重置数据库并重新执行种子
 ```
 
-> 说明：仓库内已包含基线迁移 `prisma/migrations/20260823020000_refactor_db/migration.sql`，新环境可用 `pnpm prisma migrate deploy` 一键建表。历史环境若此前一直使用 `db push` 管理数据库，建议先备份数据，再决定是继续 `db push` 还是迁移到 `migrate` 工作流；其中 AI 文章的 `status` 已由 `Int(0/1)` 改为枚举 `AiArticleStatus`。
+> 说明：仓库内已包含基线迁移 `prisma/migrations/20260823020000_refactor_db/migration.sql`，新环境可用 `pnpm prisma migrate deploy` 一键建表。历史环境若此前一直使用 `db push` 管理数据库，建议先备份数据，再决定是继续 `db push` 还是迁移到 `migrate` 工作流；其中 AI 文章的 `status` 已由 `Int(0/1)` 改为枚举 `AiArticleStatus`。存量库升级前可先执行 `psql "$DATABASE_URL" -f scripts/migrate-ai-status.sql` 完成 `0/1 -> 枚举` 数据映射。
 
 ## ⚙️ 环境变量
 
